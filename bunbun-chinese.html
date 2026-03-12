@@ -1126,10 +1126,14 @@ Sophia is 14, heritage Cantonese speaker, ~50% comprehension, building speaking 
 }
 
 async function callAI(systemPrompt,messages) {
-  const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':'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','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:systemPrompt,messages})});
-  const data=await res.json();
-  if(data.error) throw new Error(data.error.message);
-  return data.content[0].text;
+  try {
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':'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','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:systemPrompt,messages})});
+    const data=await res.json();
+    if(data.error) throw new Error('API error: '+data.error.message+' (type: '+data.error.type+')');
+    return data.content[0].text;
+  } catch(e) {
+    throw new Error(e.message||'Unknown error');
+  }
 }
 
 async function sendChat() {
@@ -1147,7 +1151,7 @@ async function sendChat() {
     chatHistory.push({role:'assistant',content:reply});
   } catch(e) {
     removeChatLoading();
-    appendChatMsg('bunbun','哎呀！Something went wrong! 😤 Sara blames the WiFi. So do I. 🐰',null);
+    appendChatMsg('bunbun','哎呀！Error: '+e.message+' 😤',null);
   }
 }
 
