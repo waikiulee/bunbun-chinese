@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>笨笨's Chinese Adventure</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --orange: #FF8C00;
+  --orange-light: #FFF0D6;
+  --orange-mid: #FFD49A;
+  --green: #2ECC71;
+  --green-light: #D6F5E7;
+  --green-mid: #A8EDCA;
+  --pink: #FF6B9D;
+  --pink-light: #FFE8F2;
+  --gold: #FFD166;
+  --purple: #9B59B6;
+  --bg: #FFF8F0;
+  --card: #FFFFFF;
+  --card2: #FFF5EC;
+  --text: #2C1810;
+  --muted: #9B7B6B;
+  --radius: 20px;
+  --shadow: 0 8px 32px rgba(255,140,0,0.12);
+  --shadow-green: 0 8px 32px rgba(46,204,113,0.12);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ── HEADER ── */
+header {
+  background: linear-gradient(135deg, #FF8C00 0%, #FF6B9D 100%);
+  padding: 14px 16px 10px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(255,140,0,.3);
+  position: relative;
+  overflow: hidden;
+}
+header::after {
+  content: '🥕🥕🥕🥕🥕🥕🥕🥕🥕🥕🥕🥕🥕🥕🥕🥕🥕🥕🥕🥕';
+  position: absolute; bottom: 2px; left: 0; right: 0;
+  font-size: .55rem; opacity: .2; letter-spacing: 4px;
+  white-space: nowrap; overflow: hidden;
+}
+header h1 { font-family:'Fredoka One',cursive; font-size:clamp(1.4rem,4vw,2.2rem); color:white; text-shadow:0 2px 8px rgba(0,0,0,.2); }
+header p { color:rgba(255,255,255,.85); font-size:.8rem; font-weight:700; margin-top:2px; }
+
+/* ── CARROT BAR ── */
+.carrot-bar {
+  background: linear-gradient(135deg, #C0560A, #E87820);
+  padding: 7px 14px;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.carrot-label { color: var(--gold); font-weight:900; font-size:.78rem; white-space:nowrap; }
+.carrot-track { flex:1; min-width:60px; height:10px; background:rgba(255,255,255,.2); border-radius:99px; overflow:hidden; }
+.carrot-fill { height:100%; background:linear-gradient(90deg,var(--gold),#FFA500); border-radius:99px; transition:width .8s cubic-bezier(.34,1.56,.64,1); }
+.carrot-pts { color:rgba(255,255,255,.85); font-size:.72rem; font-weight:800; white-space:nowrap; }
+.streak-pill { background:rgba(255,255,255,.15); border-radius:99px; padding:3px 9px; color:var(--gold); font-weight:900; font-size:.72rem; }
+.level-pill { background:rgba(255,255,255,.15); border-radius:99px; padding:3px 9px; color:white; font-weight:900; font-size:.72rem; }
+
+/* ── NAV ── */
+nav {
+  display:flex; overflow-x:auto; gap:4px; padding:8px 10px;
+  background:white; border-bottom:2px solid rgba(255,140,0,.1);
+  scrollbar-width:none;
+}
+nav::-webkit-scrollbar { display:none; }
+nav button {
+  flex-shrink:0; background:var(--card2); border:2px solid rgba(255,140,0,.15);
+  border-radius:99px; padding:7px 13px;
+  font-family:'Nunito',sans-serif; font-weight:800; font-size:.75rem;
+  color:var(--muted); cursor:pointer; transition:all .2s; white-space:nowrap;
+}
+nav button:hover { border-color:var(--orange); color:var(--orange); transform:translateY(-1px); }
+nav button.active { background:linear-gradient(135deg,var(--orange),var(--pink)); color:white; border-color:transparent; box-shadow:0 4px 14px rgba(255,140,0,.35); }
+
+/* ── MAIN ── */
+main { padding:12px; max-width:720px; margin:0 auto; }
+.section { display:none; animation:fadeUp .3s ease; }
+.section.active { display:block; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+
+/* ── CARDS ── */
+.card { background:var(--card); border-radius:var(--radius); padding:18px; margin-bottom:12px; box-shadow:var(--shadow); border:1px solid rgba(255,140,0,.1); }
+.card-title { font-family:'Fredoka One',cursive; font-size:1.1rem; color:var(--orange); margin-bottom:12px; display:flex; align-items:center; gap:7px; }
+
+/* ── BUN BUN SVG ── */
+function makeBunBunSVG — defined in JS below
+
+/* ── BUN BUN BUBBLE ── */
+.bb-msg { display:flex; gap:10px; margin-bottom:16px; align-items:flex-start; }
+.bb-bubble {
+  background:linear-gradient(135deg,#FFF5EC,#FFF0F5);
+  border-radius:0 16px 16px 16px; padding:12px 14px; flex:1;
+  border:1.5px solid rgba(255,140,0,.2); font-weight:700; font-size:.88rem; line-height:1.6;
+  box-shadow:0 4px 12px rgba(255,140,0,.1);
+}
+.bb-audio-row { display:flex; gap:5px; margin-top:8px; flex-wrap:wrap; align-items:center; }
+
+/* ── AUDIO BUTTONS ── */
+.aud-btn {
+  display:inline-flex; align-items:center; justify-content:center; gap:3px;
+  border-radius:99px; padding:4px 10px; height:28px;
+  font-size:.72rem; font-weight:800; cursor:pointer; transition:all .18s; border:none;
+  white-space:nowrap;
+}
+.aud-cant { background:rgba(255,140,0,.15); color:var(--orange); border:1.5px solid rgba(255,140,0,.3); }
+.aud-cant:hover { background:var(--orange); color:white; }
+.aud-mand { background:rgba(46,204,113,.15); color:#1a8a4a; border:1.5px solid rgba(46,204,113,.35); }
+.aud-mand:hover { background:var(--green); color:white; }
+.aud-bb { background:rgba(255,107,157,.15); color:var(--pink); border:1.5px solid rgba(255,107,157,.3); }
+.aud-bb:hover { background:var(--pink); color:white; }
+.aud-btn.playing { animation:audPulse .4s ease infinite alternate; }
+@keyframes audPulse { from{transform:scale(1)} to{transform:scale(1.15)} }
+
+/* ── VOCAB ── */
+.vocab-item { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px; }
+.vocab-lang { background:var(--card2); border-radius:14px; padding:10px 12px; border:2px solid transparent; transition:all .2s; }
+.vocab-lang.cant-card { border-color:rgba(255,140,0,.3); background:var(--orange-light); }
+.vocab-lang.mand-card { border-color:rgba(46,204,113,.3); background:var(--green-light); }
+.vocab-lang-label { font-size:.62rem; font-weight:900; text-transform:uppercase; letter-spacing:1px; margin-bottom:3px; }
+.cant-card .vocab-lang-label { color:var(--orange); }
+.mand-card .vocab-lang-label { color:#1a8a4a; }
+.vocab-char { font-family:'Noto Sans SC',sans-serif; font-size:1.7rem; line-height:1.1; }
+.vocab-roman { font-size:.72rem; font-weight:700; color:var(--muted); margin-top:2px; }
+.vocab-row { display:flex; align-items:center; justify-content:space-between; margin-top:5px; }
+.vocab-english { font-size:.8rem; font-weight:800; color:var(--text); }
+.fav-btn { background:none; border:none; cursor:pointer; font-size:1rem; transition:transform .2s; padding:2px; }
+.fav-btn:hover { transform:scale(1.3); }
+
+/* ── UNIT TABS ── */
+.unit-tabs { display:flex; gap:5px; flex-wrap:wrap; margin-bottom:12px; }
+.unit-tab { background:var(--card2); border:2px solid rgba(255,140,0,.15); border-radius:99px; padding:6px 12px; font-family:'Nunito',sans-serif; font-weight:800; font-size:.75rem; color:var(--muted); cursor:pointer; transition:all .2s; }
+.unit-tab.active { background:var(--orange); color:white; border-color:var(--orange); }
+
+/* ── CHAT ── */
+.chat-messages { height:300px; overflow-y:auto; padding:10px; background:var(--card2); border-radius:14px; margin-bottom:10px; display:flex; flex-direction:column; gap:8px; scroll-behavior:smooth; }
+.chat-msg { display:flex; gap:8px; align-items:flex-start; }
+.chat-msg.sophia { flex-direction:row-reverse; }
+.chat-avatar { width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.9rem; flex-shrink:0; overflow:hidden; }
+.chat-msg.bunbun .chat-avatar { background:linear-gradient(135deg,#FFF0D6,#FFE0F0); border:2px solid rgba(255,140,0,.3); }
+.chat-msg.sophia .chat-avatar { background:linear-gradient(135deg,#D6F5E7,#E0F8FF); border:2px solid rgba(46,204,113,.3); font-size:1.1rem; }
+.chat-text { max-width:78%; padding:9px 12px; border-radius:12px; font-size:.86rem; font-weight:700; line-height:1.55; }
+.chat-msg.bunbun .chat-text { background:white; border:1px solid rgba(255,140,0,.15); border-radius:0 12px 12px 12px; }
+.chat-msg.sophia .chat-text { background:linear-gradient(135deg,var(--orange),var(--pink)); color:white; border-radius:12px 0 12px 12px; }
+.starter-chips { display:flex; gap:5px; flex-wrap:wrap; margin-bottom:8px; }
+.starter-chip { background:white; border:1.5px solid rgba(255,140,0,.25); border-radius:99px; padding:5px 12px; font-size:.72rem; font-weight:800; color:var(--orange); cursor:pointer; transition:all .18s; white-space:nowrap; }
+.starter-chip:hover { background:var(--orange); color:white; transform:translateY(-1px); }
+.chat-input-row { display:flex; gap:6px; }
+.chat-input { flex:1; background:white; border:2px solid rgba(255,140,0,.2); border-radius:99px; padding:9px 16px; font-family:'Nunito',sans-serif; font-weight:700; font-size:.86rem; color:var(--text); outline:none; transition:border-color .2s; }
+.chat-input:focus { border-color:var(--orange); }
+.chat-send { background:linear-gradient(135deg,var(--orange),var(--pink)); border:none; border-radius:99px; width:40px; height:40px; color:white; font-size:1rem; cursor:pointer; transition:all .2s; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+.chat-send:hover { transform:scale(1.08); }
+.mic-btn { background:linear-gradient(135deg,var(--green),#00B4D8); border:none; border-radius:99px; width:40px; height:40px; color:white; font-size:1rem; cursor:pointer; transition:all .2s; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+.mic-btn.listening { animation:micPulse .8s ease-in-out infinite; background:linear-gradient(135deg,#FF6B6B,#FF4757); }
+@keyframes micPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.15)} }
+
+/* ── GAMES ── */
+.game-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.game-tile { background:white; border-radius:var(--radius); padding:16px 12px; text-align:center; cursor:pointer; border:2px solid rgba(255,140,0,.1); transition:all .22s; box-shadow:var(--shadow); }
+.game-tile:hover { transform:translateY(-4px); border-color:var(--orange); box-shadow:0 12px 32px rgba(255,140,0,.2); }
+.game-icon { font-size:2rem; margin-bottom:5px; display:block; }
+.game-name { font-family:'Fredoka One',cursive; font-size:.92rem; color:var(--text); }
+.game-desc { font-size:.7rem; color:var(--muted); margin-top:2px; font-weight:700; }
+.quiz-char { text-align:center; font-family:'Noto Sans SC',sans-serif; font-size:4rem; line-height:1; margin:12px 0 4px; }
+.quiz-sub { text-align:center; color:var(--muted); font-size:.8rem; margin-bottom:12px; font-weight:700; }
+.quiz-opts { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
+.quiz-opt { background:var(--card2); border:2px solid rgba(255,140,0,.15); border-radius:12px; padding:11px 8px; font-family:'Nunito',sans-serif; font-weight:800; font-size:.85rem; text-align:center; cursor:pointer; transition:all .18s; color:var(--text); }
+.quiz-opt:hover { border-color:var(--orange); color:var(--orange); }
+.quiz-opt.correct { background:rgba(46,204,113,.15); border-color:var(--green); color:#1a8a4a; }
+.quiz-opt.wrong { background:rgba(255,107,157,.15); border-color:var(--pink); color:#C0004A; }
+.quiz-score { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+.score-pill { background:linear-gradient(135deg,var(--gold),#FFA500); border-radius:99px; padding:4px 12px; font-weight:900; font-size:.8rem; color:#5C3000; }
+.match-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:5px; }
+.match-card { background:linear-gradient(135deg,var(--orange),var(--pink)); border-radius:10px; padding:8px 4px; text-align:center; cursor:pointer; min-height:52px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:.78rem; color:white; transition:all .2s; word-break:break-all; font-family:'Noto Sans SC',sans-serif; }
+.match-card.english { background:linear-gradient(135deg,var(--green),#00B4D8); font-family:'Nunito',sans-serif; font-size:.72rem; }
+.match-card.matched { background:linear-gradient(135deg,#aaa,#ccc); opacity:.5; cursor:default; }
+.match-card.selected { transform:scale(1.06); box-shadow:0 6px 20px rgba(255,140,0,.4); }
+.match-card.wrong-flash { animation:wrongFlash .4s ease; }
+@keyframes wrongFlash { 0%,100%{transform:scale(1)} 50%{transform:scale(.93) rotate(-2deg)} }
+.tone-display { text-align:center; padding:14px; background:linear-gradient(135deg,var(--orange-light),var(--pink-light)); border-radius:var(--radius); margin-bottom:12px; }
+.tone-char { font-family:'Noto Sans SC',sans-serif; font-size:3.2rem; }
+.tone-opts { display:grid; grid-template-columns:repeat(4,1fr); gap:5px; margin-bottom:10px; }
+.tone-opt { background:white; border:2px solid rgba(255,140,0,.2); border-radius:10px; padding:9px 4px; text-align:center; cursor:pointer; transition:all .18s; font-weight:900; font-size:.78rem; }
+.tone-opt:hover { border-color:var(--orange); background:var(--orange-light); }
+.tone-curve { font-size:1rem; display:block; }
+.quiz-result { text-align:center; font-weight:900; font-size:.92rem; min-height:24px; margin-top:10px; }
+
+/* ── EMOJI GAME ── */
+.emoji-display { font-size:5rem; text-align:center; padding:20px; background:linear-gradient(135deg,var(--orange-light),var(--green-light)); border-radius:var(--radius); margin-bottom:14px; animation:emojiPop .3s cubic-bezier(.34,1.56,.64,1); }
+@keyframes emojiPop { from{transform:scale(0.5)} to{transform:scale(1)} }
+
+/* ── BUN BUN SAYS ── */
+.bbs-command { text-align:center; padding:16px; background:linear-gradient(135deg,var(--orange-light),var(--pink-light)); border-radius:var(--radius); margin-bottom:12px; }
+.bbs-char { font-family:'Noto Sans SC',sans-serif; font-size:2.2rem; margin-bottom:4px; }
+.bbs-roman { font-size:.82rem; color:var(--muted); font-weight:700; }
+.bbs-opts { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; }
+.bbs-opt { background:white; border:2px solid rgba(255,140,0,.2); border-radius:14px; padding:12px 6px; text-align:center; cursor:pointer; transition:all .2s; font-size:1.6rem; }
+.bbs-opt:hover { border-color:var(--orange); transform:scale(1.05); }
+.bbs-opt.correct { background:rgba(46,204,113,.15); border-color:var(--green); }
+.bbs-opt.wrong { background:rgba(255,107,157,.15); border-color:var(--pink); animation:wrongFlash .4s ease; }
+.bbs-label { font-size:.65rem; font-weight:800; color:var(--muted); margin-top:3px; }
+
+/* ── FAVORITES ── */
+.fav-empty { text-align:center; padding:30px; color:var(--muted); font-weight:700; font-size:.9rem; }
+.fav-empty-icon { font-size:3rem; margin-bottom:10px; }
+
+/* ── PROGRESS ── */
+.progress-unit { margin-bottom:12px; }
+.progress-unit-name { font-weight:900; font-size:.88rem; margin-bottom:5px; display:flex; justify-content:space-between; }
+.progress-bar-wrap { height:10px; background:var(--card2); border-radius:99px; overflow:hidden; }
+.progress-bar { height:100%; border-radius:99px; transition:width 1.2s cubic-bezier(.34,1.56,.64,1); }
+.badge-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(82px,1fr)); gap:7px; }
+.badge-item { background:white; border-radius:12px; padding:11px 6px; text-align:center; border:2px solid rgba(255,140,0,.1); box-shadow:var(--shadow); }
+.badge-item.locked { opacity:.3; filter:grayscale(1); }
+.badge-icon-big { font-size:1.7rem; display:block; margin-bottom:4px; }
+.badge-name { font-size:.65rem; font-weight:900; color:var(--text); }
+
+/* ── SETTINGS ── */
+.voice-section { margin-bottom:16px; }
+.voice-section h3 { font-weight:900; font-size:.88rem; margin-bottom:9px; display:flex; align-items:center; gap:6px; }
+.voice-row { display:flex; align-items:center; gap:7px; margin-bottom:7px; background:var(--card2); border-radius:12px; padding:9px 11px; border:1px solid rgba(255,140,0,.1); }
+.voice-row select { flex:1; background:white; border:1.5px solid rgba(255,140,0,.2); border-radius:8px; padding:5px 9px; font-family:'Nunito',sans-serif; font-weight:700; font-size:.8rem; color:var(--text); outline:none; cursor:pointer; }
+.voice-row label { font-size:.75rem; font-weight:800; color:var(--muted); white-space:nowrap; min-width:76px; }
+.test-btn { background:linear-gradient(135deg,var(--orange),var(--pink)); border:none; border-radius:99px; padding:6px 13px; font-family:'Nunito',sans-serif; font-weight:800; font-size:.75rem; color:white; cursor:pointer; white-space:nowrap; transition:all .18s; }
+.test-btn:hover { transform:scale(1.05); }
+.test-btn.mand { background:linear-gradient(135deg,var(--green),#00B4D8); }
+.test-btn.bb { background:linear-gradient(135deg,var(--pink),#FF8C42); }
+.rate-row { display:flex; align-items:center; gap:9px; margin-top:6px; padding:0 4px; }
+.rate-row label { font-size:.75rem; font-weight:800; color:var(--muted); white-space:nowrap; }
+.rate-row input[type=range] { flex:1; accent-color:var(--orange); }
+.rate-val { font-weight:900; font-size:.8rem; color:var(--orange); min-width:28px; }
+.voice-note { font-size:.73rem; color:var(--muted); font-weight:700; margin-top:6px; line-height:1.55; }
+.edge-tip { background:linear-gradient(135deg,var(--orange-light),var(--green-light)); border:1.5px solid rgba(255,140,0,.25); border-radius:14px; padding:12px 14px; margin-bottom:16px; font-size:.8rem; font-weight:700; line-height:1.6; }
+.edge-tip strong { color:var(--orange); }
+
+/* ── BUTTONS ── */
+.btn { font-family:'Nunito',sans-serif; font-weight:800; font-size:.85rem; border:none; border-radius:99px; padding:9px 20px; cursor:pointer; transition:all .18s; }
+.btn:hover { transform:translateY(-2px); filter:brightness(1.05); }
+.btn:active { transform:scale(.97); }
+.btn-orange { background:linear-gradient(135deg,var(--orange),var(--pink)); color:white; box-shadow:0 4px 14px rgba(255,140,0,.35); }
+.btn-green { background:linear-gradient(135deg,var(--green),#00B4D8); color:#003D2E; box-shadow:0 4px 14px rgba(46,204,113,.35); }
+.btn-gold { background:linear-gradient(135deg,var(--gold),#FFA500); color:#5C3000; }
+.btn-gray { background:var(--card2); color:var(--muted); border:2px solid rgba(255,140,0,.15); }
+.btn-row { display:flex; gap:7px; flex-wrap:wrap; margin-top:11px; justify-content:center; }
+
+/* ── HOME GRID ── */
+.home-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
+.home-tile { background:white; border-radius:var(--radius); padding:16px 12px; text-align:center; cursor:pointer; border:2px solid rgba(255,140,0,.1); transition:all .2s; box-shadow:var(--shadow); }
+.home-tile:hover { transform:translateY(-3px); border-color:var(--orange); }
+.home-tile-icon { font-size:2rem; margin-bottom:5px; }
+.home-tile-name { font-family:'Fredoka One',cursive; font-size:.95rem; color:var(--orange); }
+.home-tile-desc { font-size:.7rem; color:var(--muted); font-weight:700; margin-top:2px; }
+
+/* ── DAILY BONUS ── */
+.daily-bonus { background:linear-gradient(135deg,var(--gold),#FFA500); border-radius:var(--radius); padding:14px; margin-bottom:12px; text-align:center; box-shadow:0 4px 20px rgba(255,165,0,.3); }
+.daily-bonus h3 { font-family:'Fredoka One',cursive; font-size:1.1rem; color:#5C3000; }
+.daily-bonus p { font-size:.78rem; font-weight:700; color:#7A4000; margin-top:4px; }
+
+/* ── LOADING ── */
+.loading { display:flex; align-items:center; gap:6px; color:var(--muted); font-weight:700; font-size:.83rem; }
+.dot-pulse { display:flex; gap:3px; }
+.dot-pulse span { width:5px; height:5px; background:var(--orange); border-radius:50%; animation:dp 1.2s ease-in-out infinite; }
+.dot-pulse span:nth-child(2){animation-delay:.2s} .dot-pulse span:nth-child(3){animation-delay:.4s}
+@keyframes dp{0%,80%,100%{transform:scale(0)}40%{transform:scale(1)}}
+
+/* ── CONFETTI ── */
+.confetti-wrap { position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden; }
+.cp { position:absolute;border-radius:2px;animation:cpFall 1.6s ease-in forwards; }
+@keyframes cpFall { 0%{transform:translateY(-20px) rotate(0);opacity:1} 100%{transform:translateY(100vh) rotate(720deg);opacity:0} }
+
+/* ── SILLY ── */
+.silly-word-chip { background:linear-gradient(135deg,var(--orange),var(--pink)); color:white; border-radius:99px; padding:4px 12px; font-weight:800; font-size:.78rem; display:inline-flex; align-items:center; gap:5px; font-family:'Noto Sans SC',sans-serif; }
+
+@media(max-width:480px){
+  .vocab-item{grid-template-columns:1fr}
+  .match-grid{grid-template-columns:repeat(3,1fr)}
+  .tone-opts{grid-template-columns:repeat(2,1fr)}
+  .bbs-opts{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="confetti-wrap" id="confetti"></div>
+
+<header>
+  <h1>🐰 笨笨's Chinese Adventure</h1>
+  <p>Learn Chinese with your grumpy underground landlord</p>
+</header>
+
+<div class="carrot-bar">
+  <span class="carrot-label">🥕</span>
+  <div class="carrot-track"><div class="carrot-fill" id="carrotFill" style="width:0%"></div></div>
+  <span class="carrot-pts"><span id="carrotNum">0</span>/<span id="carrotNext">100</span></span>
+  <span class="level-pill">🌱 <span id="levelName">Carrot Seedling</span></span>
+  <span class="streak-pill">🔥 <span id="streakNum">0</span>d</span>
+</div>
+
+<nav>
+  <button class="active" onclick="showSection('home',this)">🏠 Home</button>
+  <button onclick="showSection('learn',this)">📚 Learn</button>
+  <button onclick="showSection('chat',this)">💬 Chat</button>
+  <button onclick="showSection('play',this)">🎮 Play</button>
+  <button onclick="showSection('favorites',this)">❤️ Favorites</button>
+  <button onclick="showSection('progress',this)">🏆 Progress</button>
+  <button onclick="showSection('settings',this)">⚙️ Voices</button>
+</nav>
+
+<main>
+
+<!-- ══ HOME ══ -->
+<section id="home" class="section active">
+  <div id="dailyBonusDiv"></div>
+  <div class="bb-msg">
+    <div id="bbAvatarHome" style="flex-shrink:0;"></div>
+    <div class="bb-bubble" id="homeBubble">
+      Loading... 🥕
+      <div class="bb-audio-row" id="homeBubbleAudio"></div>
+    </div>
+  </div>
+  <div class="home-grid">
+    <div class="home-tile" onclick="showSection('learn',document.querySelector('nav button:nth-child(2)'))">
+      <div class="home-tile-icon">📚</div>
+      <div class="home-tile-name">Learn</div>
+      <div class="home-tile-desc">Vocabulary units</div>
+    </div>
+    <div class="home-tile" onclick="showSection('chat',document.querySelector('nav button:nth-child(3)'))">
+      <div class="home-tile-icon">💬</div>
+      <div class="home-tile-name">Chat</div>
+      <div class="home-tile-desc">Talk to 笨笨</div>
+    </div>
+    <div class="home-tile" onclick="showSection('play',document.querySelector('nav button:nth-child(4)'))">
+      <div class="home-tile-icon">🎮</div>
+      <div class="home-tile-name">Play</div>
+      <div class="home-tile-desc">Games & quizzes</div>
+    </div>
+    <div class="home-tile" onclick="showSection('favorites',document.querySelector('nav button:nth-child(5)'))">
+      <div class="home-tile-icon">❤️</div>
+      <div class="home-tile-name">Favorites</div>
+      <div class="home-tile-desc">Your saved words</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">🥕 Word of the Day</div>
+    <div id="wordOfDay"></div>
+  </div>
+</section>
+
+<!-- ══ LEARN ══ -->
+<section id="learn" class="section">
+  <div class="unit-tabs" id="unitTabs"></div>
+  <div class="card">
+    <div class="card-title" id="unitTitle">🎨 Colors</div>
+    <div class="bb-msg" style="margin-bottom:12px;">
+      <div id="bbAvatarLearn" style="flex-shrink:0;"></div>
+      <div class="bb-bubble" style="font-size:.82rem;">
+        <span id="learnBubbleText">Tap 🔊 to hear any word!</span>
+        <div class="bb-audio-row" id="learnBubbleAudio"></div>
+      </div>
+    </div>
+    <div id="vocabList"></div>
+  </div>
+</section>
+
+<!-- ══ CHAT ══ -->
+<section id="chat" class="section">
+  <div class="card" style="padding:14px;">
+    <div class="card-title">💬 Chat with 笨笨</div>
+    <div style="font-size:.7rem;color:var(--muted);font-weight:700;margin-bottom:8px;">
+      🟠 Orange = Cantonese &nbsp;|&nbsp; 🟢 Green = Mandarin &nbsp;|&nbsp; 🐰 = 笨笨's voice
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="starter-chips" id="starterChips">
+      <button class="starter-chip" onclick="useStarter('Tell me about your underground compound! 🏰')">Tell me about your compound 🏰</button>
+      <button class="starter-chip" onclick="useStarter('Teach me a Cantonese word!')">Teach me a word 😄</button>
+      <button class="starter-chip" onclick="useStarter('How do I order milk tea in Chinese? 🧋')">Order milk tea 🧋</button>
+      <button class="starter-chip" onclick="useStarter('What does Sara think about teaching me? 🐆')">What does Sara think? 🐆</button>
+      <button class="starter-chip" onclick="useStarter('How do I say something is smelly in Cantonese? 😂')">Say something smelly 😂</button>
+    </div>
+    <div class="chat-input-row">
+      <input class="chat-input" id="chatInput" placeholder="Type in English, Chinese, or pinyin..."
+             onkeydown="if(event.key==='Enter')sendChat()">
+      <button class="mic-btn" id="micBtn" onclick="toggleMic()" title="Speak">🎤</button>
+      <button class="chat-send" onclick="sendChat()">➤</button>
+    </div>
+    <div style="font-size:.68rem;color:var(--muted);font-weight:700;text-align:center;margin-top:4px;" id="micHint">🎤 Mic works best in Chrome on desktop</div>
+  </div>
+</section>
+
+<!-- ══ PLAY ══ -->
+<section id="play" class="section">
+  <div id="gameMenu">
+    <div class="bb-msg" style="margin-bottom:10px;">
+      <div id="bbAvatarPlay" style="flex-shrink:0;"></div>
+      <div class="bb-bubble" style="font-size:.8rem;">
+        Pick a game. Try not to embarrass the carrot empire. 😤
+        <div class="bb-audio-row"><button class="aud-btn aud-bb" onclick="speakBB('Pick a game. Try not to embarrass the carrot empire.')">🐰 🔊</button></div>
+      </div>
+    </div>
+    <div class="game-grid">
+      <div class="game-tile" onclick="startGame('quiz')"><span class="game-icon">🎯</span><div class="game-name">Speed Quiz</div><div class="game-desc">What does it mean?</div></div>
+      <div class="game-tile" onclick="startGame('match')"><span class="game-icon">🃏</span><div class="game-name">Dragon Match</div><div class="game-desc">Match the pairs!</div></div>
+      <div class="game-tile" onclick="startGame('tone')"><span class="game-icon">🗼</span><div class="game-name">Tone Tower</div><div class="game-desc">Pick the right tone</div></div>
+      <div class="game-tile" onclick="startGame('silly')"><span class="game-icon">😂</span><div class="game-name">Silly Sentences</div><div class="game-desc">Make 笨笨 laugh</div></div>
+      <div class="game-tile" onclick="startGame('bbsays')"><span class="game-icon">🐰</span><div class="game-name">笨笨 Says</div><div class="game-desc">Chinese Simon Says!</div></div>
+      <div class="game-tile" onclick="startGame('emoji')"><span class="game-icon">🤔</span><div class="game-name">Emoji Translator</div><div class="game-desc">What's the Chinese word?</div></div>
+    </div>
+  </div>
+
+  <!-- Speed Quiz -->
+  <div id="gameQuiz" style="display:none;">
+    <div class="card">
+      <div class="quiz-score"><div class="card-title" style="margin:0;">🎯 Speed Quiz</div><div class="score-pill">🥕 <span id="quizScore">0</span></div></div>
+      <div style="text-align:center;" id="quizAudRow"></div>
+      <div class="quiz-char" id="quizChar">—</div>
+      <div class="quiz-sub" id="quizSub"></div>
+      <div class="quiz-opts" id="quizOpts"></div>
+      <div class="quiz-result" id="quizResult"></div>
+      <div class="bb-msg" style="margin-top:12px;"><div id="bbAvatarQuiz" style="flex-shrink:0;"></div><div class="bb-bubble" style="font-size:.78rem;" id="quizBBMsg">Ready? 😤<div class="bb-audio-row" id="quizBBAudio"></div></div></div>
+      <div class="btn-row"><button class="btn btn-orange" onclick="nextQuizQ()">Next ➜</button><button class="btn btn-gray" onclick="backToGames()">← Games</button></div>
+    </div>
+  </div>
+
+  <!-- Dragon Match -->
+  <div id="gameMatch" style="display:none;">
+    <div class="card">
+      <div class="quiz-score"><div class="card-title" style="margin:0;">🃏 Dragon Match</div><div class="score-pill">🥕 <span id="matchScore">0</span></div></div>
+      <div style="text-align:center;font-size:.75rem;color:var(--muted);font-weight:700;margin-bottom:9px;">Match Chinese to English!</div>
+      <div class="match-grid" id="matchGrid"></div>
+      <div style="text-align:center;margin-top:9px;font-weight:800;font-size:.85rem;color:var(--muted);" id="matchStatus"></div>
+      <div class="btn-row"><button class="btn btn-green" onclick="initMatch()">🔀 New Round</button><button class="btn btn-gray" onclick="backToGames()">← Games</button></div>
+    </div>
+  </div>
+
+  <!-- Tone Tower -->
+  <div id="gameTone" style="display:none;">
+    <div class="card">
+      <div class="quiz-score"><div class="card-title" style="margin:0;">🗼 Tone Tower</div><div class="score-pill">🥕 <span id="toneScore">0</span></div></div>
+      <div class="tone-display">
+        <div class="tone-char" id="toneChar">—</div>
+        <div style="font-size:.8rem;color:var(--muted);font-weight:700;margin-top:3px;" id="toneHint"></div>
+        <div style="margin-top:8px;"><button class="btn btn-orange" style="padding:6px 16px;font-size:.78rem;" onclick="playToneWord()">🔊 Hear again</button></div>
+      </div>
+      <div style="font-size:.8rem;font-weight:800;text-align:center;margin-bottom:7px;">Which Mandarin tone?</div>
+      <div class="tone-opts" id="toneOpts"></div>
+      <div class="quiz-result" id="toneResult"></div>
+      <div class="btn-row"><button class="btn btn-orange" onclick="nextTone()">Next ➜</button><button class="btn btn-gray" onclick="backToGames()">← Games</button></div>
+    </div>
+  </div>
+
+  <!-- Silly Sentences -->
+  <div id="gameSilly" style="display:none;">
+    <div class="card">
+      <div class="card-title">😂 Silly Sentence Showdown</div>
+      <div class="bb-msg" style="margin-bottom:10px;">
+        <div id="bbAvatarSilly" style="flex-shrink:0;"></div>
+        <div class="bb-bubble" style="font-size:.8rem;"><span id="sillyPrompt">Use these words to make the SILLIEST sentence! Chinese, English, mix — anything goes! 😂</span><div class="bb-audio-row"><button class="aud-btn aud-bb" onclick="speakBB('Use these words to make the silliest sentence! Anything goes!')">🐰 🔊</button></div></div>
+      </div>
+      <div style="margin-bottom:10px;"><div style="font-size:.72rem;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;">Your words:</div><div id="sillyWords" style="display:flex;flex-wrap:wrap;gap:5px;"></div></div>
+      <textarea id="sillyInput" placeholder="Make your silliest sentence! 😂" style="width:100%;background:var(--card2);border:2px solid rgba(255,140,0,.2);border-radius:12px;padding:10px;font-family:'Nunito',sans-serif;font-weight:700;font-size:.85rem;resize:vertical;min-height:68px;color:var(--text);outline:none;"></textarea>
+      <div class="btn-row"><button class="btn btn-orange" onclick="submitSilly()">Submit! 😂</button><button class="btn btn-gold" onclick="initSilly()">🔀 New Words</button><button class="btn btn-gray" onclick="backToGames()">← Games</button></div>
+      <div id="sillyResult" style="margin-top:10px;"></div>
+    </div>
+  </div>
+
+  <!-- 笨笨 Says -->
+  <div id="gameBBSays" style="display:none;">
+    <div class="card">
+      <div class="quiz-score"><div class="card-title" style="margin:0;">🐰 笨笨 Says</div><div class="score-pill">🥕 <span id="bbsScore">0</span></div></div>
+      <div class="bb-msg" style="margin-bottom:10px;">
+        <div id="bbAvatarBBS" style="flex-shrink:0;"></div>
+        <div class="bb-bubble" style="font-size:.8rem;"><span id="bbsInstruction">笨笨 says...</span><div class="bb-audio-row" id="bbsAudio"></div></div>
+      </div>
+      <div class="bbs-command">
+        <div class="bbs-char" id="bbsChar">—</div>
+        <div class="bbs-roman" id="bbsRoman"></div>
+      </div>
+      <div style="font-size:.78rem;font-weight:800;text-align:center;color:var(--muted);margin-bottom:8px;">Tap the right picture!</div>
+      <div class="bbs-opts" id="bbsOpts"></div>
+      <div class="quiz-result" id="bbsResult"></div>
+      <div class="btn-row"><button class="btn btn-orange" onclick="nextBBS()">Next ➜</button><button class="btn btn-gray" onclick="backToGames()">← Games</button></div>
+    </div>
+  </div>
+
+  <!-- Emoji Translator -->
+  <div id="gameEmoji" style="display:none;">
+    <div class="card">
+      <div class="quiz-score"><div class="card-title" style="margin:0;">🤔 Emoji Translator</div><div class="score-pill">🥕 <span id="emojiScore">0</span></div></div>
+      <div class="emoji-display" id="emojiDisplay">🐷</div>
+      <div style="font-size:.8rem;font-weight:800;text-align:center;color:var(--muted);margin-bottom:10px;">What's the Chinese word?</div>
+      <div class="quiz-opts" id="emojiOpts"></div>
+      <div class="quiz-result" id="emojiResult"></div>
+      <div class="bb-msg" style="margin-top:10px;"><div id="bbAvatarEmoji" style="flex-shrink:0;"></div><div class="bb-bubble" style="font-size:.78rem;" id="emojiBBMsg">Match the emoji to the Chinese character! 🥕<div class="bb-audio-row" id="emojiBBAudio"></div></div></div>
+      <div class="btn-row"><button class="btn btn-orange" onclick="nextEmoji()">Next ➜</button><button class="btn btn-gray" onclick="backToGames()">← Games</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FAVORITES ══ -->
+<section id="favorites" class="section">
+  <div class="bb-msg">
+    <div id="bbAvatarFav" style="flex-shrink:0;"></div>
+    <div class="bb-bubble" id="favBubble" style="font-size:.82rem;">
+      Your saved words. From MY vocab list. You're welcome. 😤
+      <div class="bb-audio-row" id="favBubbleAudio"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">❤️ Your Favorites</div>
+    <div id="favList"></div>
+  </div>
+</section>
+
+<!-- ══ PROGRESS ══ -->
+<section id="progress" class="section">
+  <div class="card"><div class="card-title">📊 Your Progress</div><div id="progressUnits"></div></div>
+  <div class="card"><div class="card-title">🏅 Badges</div><div class="badge-grid" id="badgeGrid"></div></div>
+  <div class="card"><div class="card-title">📈 Stats</div><div id="statsDisplay"></div></div>
+</section>
+
+<!-- ══ VOICES ══ -->
+<section id="settings" class="section">
+  <div class="card">
+    <div class="card-title">⚙️ Voice Settings</div>
+    <div class="bb-msg" style="margin-bottom:14px;">
+      <div id="bbAvatarSettings" style="flex-shrink:0;"></div>
+      <div class="bb-bubble" style="font-size:.8rem;">
+        Pick my voice carefully. I sound important. Because I am. 😤🐰
+        <div class="bb-audio-row" id="settingsBubbleAudio"></div>
+      </div>
+    </div>
+
+    <div class="edge-tip">
+      💡 <strong>Use Microsoft Edge for the best voices!</strong><br>
+      Edge has more natural-sounding neural voices than Chrome. Once in Edge, the best voices to select are:<br>
+      🟠 Cantonese: <strong>Microsoft HiuGaai</strong> (zh-HK)<br>
+      🟢 Mandarin: <strong>Microsoft Xiaoxiao</strong> (zh-CN)<br>
+      🐰 笨笨 English: <strong>Microsoft Maisie</strong> (en-GB) — young, cheeky, perfect!
+    </div>
+
+    <div class="voice-section">
+      <h3 style="color:var(--orange);">🟠 Cantonese Voice (zh-HK)</h3>
+      <div class="voice-row"><label>Voice:</label><select id="cantVoiceSelect" onchange="saveVoicePrefs()"></select><button class="test-btn" onclick="testVoice('cant')">▶ Test</button></div>
+      <div class="rate-row"><label>Speed:</label><input type="range" id="cantRate" min="0.5" max="1.5" step="0.05" value="0.85" oninput="updateRateLabel('cant');saveVoicePrefs()"><span class="rate-val" id="cantRateVal">0.85</span></div>
+    </div>
+
+    <div class="voice-section">
+      <h3 style="color:#1a8a4a;">🟢 Mandarin Voice (zh-CN)</h3>
+      <div class="voice-row"><label>Voice:</label><select id="mandVoiceSelect" onchange="saveVoicePrefs()"></select><button class="test-btn mand" onclick="testVoice('mand')">▶ Test</button></div>
+      <div class="rate-row"><label>Speed:</label><input type="range" id="mandRate" min="0.5" max="1.5" step="0.05" value="0.85" oninput="updateRateLabel('mand');saveVoicePrefs()"><span class="rate-val" id="mandRateVal">0.85</span></div>
+    </div>
+
+    <div class="voice-section">
+      <h3 style="color:var(--pink);">🐰 笨笨's Voice (English)</h3>
+      <div class="voice-row"><label>Voice:</label><select id="bbVoiceSelect" onchange="saveVoicePrefs()"></select><button class="test-btn bb" onclick="testVoice('bb')">▶ Test</button></div>
+      <div class="rate-row"><label>Speed:</label><input type="range" id="bbRate" min="0.5" max="1.5" step="0.05" value="0.95" oninput="updateRateLabel('bb');saveVoicePrefs()"><span class="rate-val" id="bbRateVal">0.95</span></div>
+      <p class="voice-note">💡 Recommend <strong>Microsoft Maisie (en-GB)</strong> — sounds like a cheeky young British girl. Perfect for a grumpy infinitaire rabbit. 🐰</p>
+    </div>
+
+    <div class="voice-note" style="background:var(--card2);padding:11px;border-radius:12px;margin-top:4px;">
+      ⚠️ <strong>Safari / iOS:</strong> Limited voice options — Edge or Chrome on desktop gives the best results.<br>
+      ⚠️ <strong>Voices load after first page interaction</strong> — if the list is empty, tap anywhere first then reopen this tab.
+    </div>
+  </div>
+</section>
+
+</main>
+<script>
+// ═══════════════════════════════════
+// BUN BUN SVG — chonky cream rabbit, pink heart nose, bead eyes
+// Matches the real stuffed animal photos!
+// ═══════════════════════════════════
+function makeBunBunSVG(size=60, sunglasses=false, saraToo=false) {
+  return `<svg width="${size}" height="${size*1.15}" viewBox="0 0 100 115" xmlns="http://www.w3.org/2000/svg" style="animation:bunFloat 3s ease-in-out infinite;filter:drop-shadow(0 4px 8px rgba(255,140,0,.18));">
+    <style>@keyframes bunFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}</style>
+    <ellipse cx="32" cy="22" rx="13" ry="28" fill="#F0EAD6" stroke="#E0D4C0" stroke-width="1.5"/>
+    <ellipse cx="32" cy="24" rx="8" ry="22" fill="#F5DDD0"/>
+    <ellipse cx="68" cy="20" rx="13" ry="28" fill="#F0EAD6" stroke="#E0D4C0" stroke-width="1.5"/>
+    <ellipse cx="68" cy="22" rx="8" ry="22" fill="#F5DDD0"/>
+    <ellipse cx="50" cy="88" rx="34" ry="26" fill="#F5F0E8" stroke="#E8DFD0" stroke-width="1.5"/>
+    <circle cx="50" cy="58" r="36" fill="#F5F0E8" stroke="#E8DFD0" stroke-width="1.5"/>
+    <circle cx="38" cy="52" r="4.5" fill="#1A1A1A"/>
+    <circle cx="39.5" cy="50.5" r="1.2" fill="white"/>
+    <circle cx="62" cy="52" r="4.5" fill="#1A1A1A"/>
+    <circle cx="63.5" cy="50.5" r="1.2" fill="white"/>
+    <path d="M50 63 C47 59,43 59,43 63 C43 66,50 71,50 71 C50 71,57 66,57 63 C57 59,53 59,50 63Z" fill="#FF9EB5"/>
+    <ellipse cx="50" cy="72" rx="1.5" ry="2.5" fill="#FF9EB5" opacity="0.7"/>
+    <ellipse cx="18" cy="88" rx="9" ry="14" fill="#F0EAD6" stroke="#E0D4C0" stroke-width="1"/>
+    <ellipse cx="82" cy="88" rx="9" ry="14" fill="#F0EAD6" stroke="#E0D4C0" stroke-width="1"/>
+    <ellipse cx="34" cy="108" rx="12" ry="6" fill="#F0EAD6" stroke="#E0D4C0" stroke-width="1"/>
+    <ellipse cx="66" cy="108" rx="12" ry="6" fill="#F0EAD6" stroke="#E0D4C0" stroke-width="1"/>
+    ${sunglasses ? `
+    <rect x="26" y="46" width="20" height="14" rx="4" fill="#1A1A1A" opacity="0.92"/>
+    <rect x="54" y="46" width="20" height="14" rx="4" fill="#1A1A1A" opacity="0.92"/>
+    <line x1="46" y1="51" x2="54" y2="51" stroke="#1A1A1A" stroke-width="2.5"/>
+    <line x1="22" y1="51" x2="26" y2="51" stroke="#555" stroke-width="2"/>
+    <line x1="74" y1="51" x2="78" y2="51" stroke="#555" stroke-width="2"/>` : ''}
+    ${saraToo ? `
+    <g transform="translate(55,2) scale(0.42)">
+      <ellipse cx="25" cy="30" rx="22" ry="16" fill="#C8C8C8"/>
+      <ellipse cx="25" cy="22" rx="16" ry="14" fill="#D0D0D0"/>
+      <circle cx="16" cy="16" r="6" fill="#B0B0B0"/><circle cx="34" cy="16" r="6" fill="#B0B0B0"/>
+      <circle cx="16" cy="16" r="3" fill="#1A1A1A"/><circle cx="34" cy="16" r="3" fill="#1A1A1A"/>
+      <ellipse cx="25" cy="26" rx="5" ry="3" fill="#FFA07A"/>
+      <circle cx="20" cy="32" r="2.5" fill="#888" opacity="0.5"/>
+      <circle cx="30" cy="34" r="2" fill="#888" opacity="0.5"/>
+    </g>` : ''}
+  </svg>`;
+}
+
+// ═══════════════════════════════════
+// VOCABULARY DATA — Cantonese: Traditional Chinese | Mandarin: Simplified Chinese
+// ═══════════════════════════════════
+const UNITS = [
+  { id:'colors', name:'🎨 Colors', icon:'🎨', words:[
+    {eng:'Red',     cant:'紅色', jyut:'hung4 sik1', mand:'红色', pin:'hóng sè', emoji:'🔴'},
+    {eng:'Blue',    cant:'藍色', jyut:'laam4 sik1', mand:'蓝色', pin:'lán sè',  emoji:'🔵'},
+    {eng:'Green',   cant:'綠色', jyut:'luk6 sik1',  mand:'绿色', pin:'lǜ sè',   emoji:'🟢'},
+    {eng:'Yellow',  cant:'黃色', jyut:'wong4 sik1', mand:'黄色', pin:'huáng sè',emoji:'🟡'},
+    {eng:'Pink',    cant:'粉紅色',jyut:'fan2 hung4 sik1',mand:'粉红色',pin:'fěn hóng sè',emoji:'🩷'},
+    {eng:'Purple',  cant:'紫色', jyut:'zi2 sik1',   mand:'紫色', pin:'zǐ sè',   emoji:'🟣'},
+    {eng:'Black',   cant:'黑色', jyut:'hak1 sik1',  mand:'黑色', pin:'hēi sè',  emoji:'⚫'},
+    {eng:'White',   cant:'白色', jyut:'baak6 sik1', mand:'白色', pin:'bái sè',  emoji:'⚪'},
+    {eng:'Orange',  cant:'橙色', jyut:'caang2 sik1',mand:'橙色', pin:'chéng sè',emoji:'🟠'},
+    {eng:'Brown',   cant:'啡色', jyut:'fe1 sik1',   mand:'棕色', pin:'zōng sè', emoji:'🟤'},
+  ]},
+  { id:'animals', name:'🐾 Animals', icon:'🐾', words:[
+    {eng:'Dog',         cant:'狗',   jyut:'gau2',        mand:'狗',   pin:'gǒu',      emoji:'🐶'},
+    {eng:'Cat',         cant:'貓',   jyut:'maau1',       mand:'猫',   pin:'māo',      emoji:'🐱'},
+    {eng:'Rabbit',      cant:'兔仔', jyut:'tou3 zai2',   mand:'兔子', pin:'tù zi',    emoji:'🐰'},
+    {eng:'Fish',        cant:'魚',   jyut:'jyu2',        mand:'鱼',   pin:'yú',       emoji:'🐟'},
+    {eng:'Pig',         cant:'豬',   jyut:'zyu1',        mand:'猪',   pin:'zhū',      emoji:'🐷'},
+    {eng:'Chicken',     cant:'雞',   jyut:'gai1',        mand:'鸡',   pin:'jī',       emoji:'🐔'},
+    {eng:'Cow',         cant:'牛',   jyut:'ngau4',       mand:'牛',   pin:'niú',      emoji:'🐄'},
+    {eng:'Snake',       cant:'蛇',   jyut:'se4',         mand:'蛇',   pin:'shé',      emoji:'🐍'},
+    {eng:'Panda',       cant:'熊貓', jyut:'hung4 maau1', mand:'熊猫', pin:'xióng māo',emoji:'🐼'},
+    {eng:'Snow Leopard',cant:'雪豹', jyut:'syut3 paau3', mand:'雪豹', pin:'xuě bào',  emoji:'🐆'},
+  ]},
+  { id:'house', name:'🏠 House', icon:'🏠', words:[
+    {eng:'Bedroom',     cant:'睡房', jyut:'seoi6 fong2', mand:'卧室',  pin:'wò shì',        emoji:'🛏️'},
+    {eng:'Bathroom',    cant:'廁所', jyut:'ci3 so2',     mand:'卫生间',pin:'wèi shēng jiān', emoji:'🚿'},
+    {eng:'Kitchen',     cant:'廚房', jyut:'cyu4 fong2',  mand:'厨房',  pin:'chú fáng',       emoji:'🍳'},
+    {eng:'Living room', cant:'客廳', jyut:'haak3 teng1', mand:'客厅',  pin:'kè tīng',        emoji:'🛋️'},
+    {eng:'Toilet',      cant:'馬桶', jyut:'maa5 tung2',  mand:'马桶',  pin:'mǎ tǒng',        emoji:'🚽'},
+    {eng:'Bed',         cant:'床',   jyut:'cong4',       mand:'床',    pin:'chuáng',         emoji:'🛏️'},
+    {eng:'Table',       cant:'枱',   jyut:'toi2',        mand:'桌子',  pin:'zhuō zi',        emoji:'🪑'},
+    {eng:'Chair',       cant:'椅子', jyut:'ji2 zi2',     mand:'椅子',  pin:'yǐ zi',          emoji:'🪑'},
+    {eng:'Phone',       cant:'手機', jyut:'sau2 gei1',   mand:'手机',  pin:'shǒu jī',        emoji:'📱'},
+    {eng:'TV',          cant:'電視', jyut:'din6 si6',    mand:'电视',  pin:'diàn shì',       emoji:'📺'},
+    {eng:'Fridge',      cant:'雪櫃', jyut:'syut3 gwai6', mand:'冰箱',  pin:'bīng xiāng',     emoji:'🧊'},
+    {eng:'Window',      cant:'窗',   jyut:'coeng1',      mand:'窗户',  pin:'chuāng hu',      emoji:'🪟'},
+  ]},
+  { id:'silly', name:'😂 Silly', icon:'😂', words:[
+    {eng:'Butt',    cant:'屁股', jyut:'pei3 gu2',   mand:'屁股', pin:'pì gu',   emoji:'🍑'},
+    {eng:'Fart',    cant:'放屁', jyut:'fong3 pei3', mand:'放屁', pin:'fàng pì', emoji:'💨'},
+    {eng:'Booger',  cant:'鼻屎', jyut:'bei6 si2',   mand:'鼻屎', pin:'bí shǐ',  emoji:'👃'},
+    {eng:'Burp',    cant:'打嗝', jyut:'daa2 gaak3', mand:'打嗝', pin:'dǎ gé',   emoji:'🫧'},
+    {eng:'Smelly',  cant:'臭',   jyut:'cau3',       mand:'臭',   pin:'chòu',    emoji:'🤢'},
+    {eng:'Poop',    cant:'大便', jyut:'daai6 bin6', mand:'大便', pin:'dà biàn', emoji:'💩'},
+    {eng:'Silly',   cant:'傻',   jyut:'saa4',       mand:'傻瓜', pin:'shǎ guā', emoji:'🤪'},
+    {eng:'Crazy',   cant:'癲',   jyut:'din1',       mand:'疯了', pin:'fēng le', emoji:'🤯'},
+    {eng:'Noisy',   cant:'嘈',   jyut:'cou4',       mand:'吵',   pin:'chǎo',    emoji:'📢'},
+    {eng:'Lazy',    cant:'懶',   jyut:'laan5',      mand:'懒',   pin:'lǎn',     emoji:'😴'},
+  ]},
+  { id:'food', name:'🍜 Food', icon:'🍜', words:[
+    {eng:'Rice',        cant:'飯',     jyut:'faan6',               mand:'饭',     pin:'fàn',          emoji:'🍚'},
+    {eng:'Noodles',     cant:'麵',     jyut:'min6',                mand:'面',     pin:'miàn',         emoji:'🍜'},
+    {eng:'Dim sum',     cant:'點心',   jyut:'dim2 sam1',           mand:'点心',   pin:'diǎn xīn',     emoji:'🥟'},
+    {eng:'Har gow',     cant:'蝦餃',   jyut:'haa1 gaau2',          mand:'虾饺',   pin:'xiā jiǎo',     emoji:'🥟'},
+    {eng:'Char siu bao',cant:'叉燒包', jyut:'caa1 siu1 baau1',     mand:'叉烧包', pin:'chā shāo bāo', emoji:'🥙'},
+    {eng:'Egg tart',    cant:'蛋撻',   jyut:'daan6 taat3',         mand:'蛋挞',   pin:'dàn tǎ',       emoji:'🥧'},
+    {eng:'Milk tea',    cant:'奶茶',   jyut:'naai5 caa4',          mand:'奶茶',   pin:'nǎi chá',      emoji:'🧋'},
+    {eng:'Congee',      cant:'粥',     jyut:'zuk1',                mand:'粥',     pin:'zhōu',         emoji:'🍲'},
+    {eng:'Bubble tea',  cant:'珍珠奶茶',jyut:'zan1 zyu1 naai5 caa4',mand:'珍珠奶茶',pin:'zhēn zhū nǎi chá',emoji:'🧋'},
+    {eng:'Ice cream',   cant:'雪糕',   jyut:'syut3 gou1',          mand:'冰淇淋', pin:'bīng qí lín',  emoji:'🍦'},
+    {eng:'Egg',         cant:'雞蛋',   jyut:'gai1 daan2',          mand:'鸡蛋',   pin:'jī dàn',       emoji:'🥚'},
+    {eng:'Water',       cant:'水',     jyut:'seoi2',               mand:'水',     pin:'shuǐ',         emoji:'💧'},
+  ]},
+];
+
+// Body parts for 笨笨 Says
+const BBS_WORDS = [
+  {cant:'頭',  jyut:'tau4',      mand:'头',  pin:'tóu',    eng:'Head',   emoji:'👆', hint:'Point up!'},
+  {cant:'眼',  jyut:'ngaan5',    mand:'眼睛',pin:'yǎn jīng',eng:'Eyes',  emoji:'👀', hint:'Eyes!'},
+  {cant:'耳',  jyut:'ji5',       mand:'耳朵',pin:'ěr duo', eng:'Ears',   emoji:'👂', hint:'Ears!'},
+  {cant:'鼻',  jyut:'bei6',      mand:'鼻子',pin:'bí zi',  eng:'Nose',   emoji:'👃', hint:'Nose!'},
+  {cant:'嘴',  jyut:'zeoi2',     mand:'嘴',  pin:'zuǐ',    eng:'Mouth',  emoji:'👄', hint:'Mouth!'},
+  {cant:'手',  jyut:'sau2',      mand:'手',  pin:'shǒu',   eng:'Hand',   emoji:'✋', hint:'Hand!'},
+  {cant:'腳',  jyut:'goek3',     mand:'脚',  pin:'jiǎo',   eng:'Foot',   emoji:'🦶', hint:'Foot!'},
+  {cant:'肚子',jyut:'tou5 zi2',  mand:'肚子',pin:'dù zi',  eng:'Tummy',  emoji:'🤰', hint:'Tummy!'},
+  {cant:'屁股',jyut:'pei3 gu2',  mand:'屁股',pin:'pì gu',  eng:'Butt',   emoji:'🍑', hint:'The silly one!'},
+  {cant:'膝蓋',jyut:'sat1 goi3', mand:'膝盖',pin:'xī gài', eng:'Knee',   emoji:'🦵', hint:'Knee!'},
+];
+
+// Emoji mapping for Emoji Translator
+const EMOJI_WORDS = [
+  {emoji:'🐶', cant:'狗', mand:'狗', eng:'Dog', jyut:'gau2', pin:'gǒu'},
+  {emoji:'🐱', cant:'貓', mand:'猫', eng:'Cat', jyut:'maau1', pin:'māo'},
+  {emoji:'🐷', cant:'豬', mand:'猪', eng:'Pig', jyut:'zyu1', pin:'zhū'},
+  {emoji:'🐼', cant:'熊貓', mand:'熊猫', eng:'Panda', jyut:'hung4 maau1', pin:'xióng māo'},
+  {emoji:'🍚', cant:'飯', mand:'饭', eng:'Rice', jyut:'faan6', pin:'fàn'},
+  {emoji:'🧋', cant:'奶茶', mand:'奶茶', eng:'Milk tea', jyut:'naai5 caa4', pin:'nǎi chá'},
+  {emoji:'🥚', cant:'雞蛋', mand:'鸡蛋', eng:'Egg', jyut:'gai1 daan2', pin:'jī dàn'},
+  {emoji:'💧', cant:'水', mand:'水', eng:'Water', jyut:'seoi2', pin:'shuǐ'},
+  {emoji:'🔴', cant:'紅色', mand:'红色', eng:'Red', jyut:'hung4 sik1', pin:'hóng sè'},
+  {emoji:'🟢', cant:'綠色', mand:'绿色', eng:'Green', jyut:'luk6 sik1', pin:'lǜ sè'},
+  {emoji:'💨', cant:'放屁', mand:'放屁', eng:'Fart', jyut:'fong3 pei3', pin:'fàng pì'},
+  {emoji:'💩', cant:'大便', mand:'大便', eng:'Poop', jyut:'daai6 bin6', pin:'dà biàn'},
+  {emoji:'🍑', cant:'屁股', mand:'屁股', eng:'Butt', jyut:'pei3 gu2', pin:'pì gu'},
+  {emoji:'😴', cant:'懶', mand:'懒', eng:'Lazy', jyut:'laan5', pin:'lǎn'},
+  {emoji:'📱', cant:'手機', mand:'手机', eng:'Phone', jyut:'sau2 gei1', pin:'shǒu jī'},
+];
+
+const BADGES = [
+  {id:'first',     icon:'🐣', name:'First Step!'},
+  {id:'colors',    icon:'🎨', name:'Color Expert'},
+  {id:'animals',   icon:'🐾', name:'Animal Lover'},
+  {id:'fartmaster',icon:'💨', name:'Fart Master'},
+  {id:'foodie',    icon:'🥟', name:'Dim Sum Queen'},
+  {id:'streak7',   icon:'🔥', name:'7-Day Streak'},
+  {id:'quiz50',    icon:'🎯', name:'Quiz Champ'},
+  {id:'brave',     icon:'🎤', name:'Brave Voice'},
+  {id:'silly5',    icon:'😂', name:'Comedy Writer'},
+  {id:'carrot100', icon:'🥕', name:'Carrot Hoarder'},
+  {id:'sara',      icon:'🐆', name:"Sara's Favorite"},
+];
+
+const LEVEL_NAMES = ['🌱 Carrot Seedling','🥕 Baby Carrot','🥕🥕 Decent Carrot','🏆 Farm Hand','👑 Carrot Royalty','🐰 笨笨 Approved'];
+
+const BB_GREETINGS = [
+  { cant:'你回來了！', mand:'你回来了！', eng:"You're back. I was NOT waiting for you. ...maybe a little. 🐰" },
+  { cant:'今天我們學什麼？', mand:'今天我们学什么？', eng:"I can hear you walking around up there. Learn something or I'm raising the rent. 😤" },
+  { cant:'準備好了嗎？', mand:'准备好了吗？', eng:"The carrot farm is thriving. Unlike your tones. Let's fix that. 🥕" },
+  { cant:'哎呀！', mand:'哎呀！', eng:"Sara's cousin Leopold is watching from Farm 3. Don't disappoint him. 🐆" },
+  { cant:'開始學習！', mand:'开始学习！', eng:"My compound has heated floors. You have a very nice home. It's still the attic. 😤 Let's go!" },
+];
+
+const BB_CORRECT = [
+  { cant:'厲害！', eng:"FINE. I admit you're smart. The farm is pleased. 🥕" },
+  { cant:'終於！', eng:"FINALLY! Sara can look again. She turned away. Very dramatic. 🐆" },
+  { cant:'好！', eng:"Good. I'm adding carrots to your account. From MY farm. You're welcome. 🥕" },
+  { cant:'棒！', eng:"The underground compound RUMBLED with approval. That means I clapped. 🐰" },
+];
+
+const BB_WRONG = [
+  { cant:'哎呀！', eng:"Aiyaa! Sara — TURN AROUND. I can't look. 😤" },
+  { cant:'不對！', eng:"I'm going to need a carrot to calm down. Sara! Elevator! NOW. 🥕" },
+  { cant:'差不多！', eng:"So close! Even the baby leopards on Farm 7 know this one. They're six weeks old. 🐆" },
+  { cant:'再試一次！', eng:"One more wrong answer and I'm converting the attic to carrot storage. I mean it. 😤" },
+];
+
+// Specific Favorites reactions
+const FAV_REACTIONS = {
+  '屁股': "Of COURSE 屁股 is in your favorites. 😤 I'm not surprised. Sara is not surprised either.",
+  '放屁': "你 saved 放屁. I raised the carrot farm from nothing for THIS. 💨",
+  '笨笨': "You saved MY name. I'm not touched. I'm not. ...okay a little. 🐰",
+  '奶茶': "Good taste in favorites. Unlike some of your quiz answers. 🧋",
+  '雪豹': "You saved 雪豹. Sara has seen this. She's pretending she didn't notice. 🐆",
+  '大便': "笨蛋farmhands! Why did I let her near the silly unit?! 💩😤",
+};
+
+// ═══════════════════════════════════
+// STATE
+// ═══════════════════════════════════
+let state = {
+  carrots:0, level:1, streak:0, lastVisit:null, dailyBonusClaimed:false,
+  masteredWords:{}, badges:[], favorites:[],
+  quizScore:0, matchScore:0, toneScore:0, sillyCount:0, bbsScore:0, emojiScore:0,
+  correctStreak:0,
+  currentUnit:0,
+  stats:{ totalCorrect:0, totalAttempts:0, micUsed:false, totalCarrotsEarned:0 },
+  voices:{ cantVoice:'', mandVoice:'', bbVoice:'', cantRate:0.85, mandRate:0.85, bbRate:0.95 }
+};
+
+function saveState() { try{ localStorage.setItem('bunbun_v2', JSON.stringify(state)); }catch(e){} }
+function loadState() {
+  try{
+    const s=localStorage.getItem('bunbun_v2');
+    if(s){ const l=JSON.parse(s); state={...state,...l}; if(!state.voices) state.voices={cantVoice:'',mandVoice:'',bbVoice:'',cantRate:0.85,mandRate:0.85,bbRate:0.95}; if(!state.favorites) state.favorites=[]; }
+  }catch(e){}
+  updateStreak();
+  checkDailyBonus();
+}
+function updateStreak() {
+  const today=new Date().toDateString();
+  if(state.lastVisit!==today){
+    const yesterday=new Date(Date.now()-86400000).toDateString();
+    state.streak=(state.lastVisit===yesterday)?(state.streak||0)+1:1;
+    state.lastVisit=today; state.dailyBonusClaimed=false; saveState();
+  }
+}
+function checkDailyBonus() {
+  const today=new Date().toDateString();
+  if(!state.dailyBonusClaimed) {
+    const bonus=20+(state.streak>1?10:0);
+    const div=document.getElementById('dailyBonusDiv');
+    if(div) div.innerHTML=`<div class="daily-bonus">
+      <h3>🥕 Daily Carrot Bonus!</h3>
+      <p>笨笨 reluctantly hands over ${bonus} carrots...<br>"Here. From MY farm. Don't read into it." 🐰</p>
+      <button class="btn btn-orange" style="margin-top:8px;" onclick="claimBonus(${bonus})">Claim ${bonus} Carrots!</button>
+    </div>`;
+  }
+}
+function claimBonus(n) {
+  state.dailyBonusClaimed=true;
+  addCarrots(n);
+  document.getElementById('dailyBonusDiv').innerHTML='';
+  confettiBurst();
+  speakBB(`Fine. Here are ${n} carrots. From my farm. Don't read into it.`);
+  saveState();
+}
+
+function addCarrots(n) {
+  state.carrots+=n; state.stats.totalCarrotsEarned=(state.stats.totalCarrotsEarned||0)+n;
+  const need=state.level*100;
+  if(state.carrots>=need){ state.carrots-=need; state.level=Math.min(state.level+1,LEVEL_NAMES.length); confettiBurst(); }
+  updateCarrotBar(); saveState(); checkBadges();
+}
+function updateCarrotBar() {
+  const need=state.level*100;
+  document.getElementById('carrotFill').style.width=(state.carrots/need*100)+'%';
+  document.getElementById('carrotNum').textContent=state.carrots;
+  document.getElementById('carrotNext').textContent=need;
+  document.getElementById('levelName').textContent=LEVEL_NAMES[state.level-1]||LEVEL_NAMES[LEVEL_NAMES.length-1];
+  document.getElementById('streakNum').textContent=state.streak||0;
+}
+function markWordSeen(key) {
+  state.masteredWords[key]=(state.masteredWords[key]||0)+1; saveState(); checkBadges();
+}
+function checkBadges() {
+  const add=(id)=>{ if(!state.badges.includes(id)){state.badges.push(id);confettiBurst();saveState();} };
+  const mc=(uid)=>UNITS.find(u=>u.id===uid).words.filter(w=>(state.masteredWords[uid+'_'+w.eng]||0)>=3).length;
+  if(Object.keys(state.masteredWords).length>=1) add('first');
+  if(mc('colors')>=8) add('colors');
+  if(mc('animals')>=8) add('animals');
+  if(mc('silly')>=8) add('fartmaster');
+  if(mc('food')>=8) add('foodie');
+  if((state.streak||0)>=7) add('streak7');
+  if((state.quizScore||0)>=50) add('quiz50');
+  if(state.stats.micUsed) add('brave');
+  if((state.sillyCount||0)>=5) add('silly5');
+  if((state.stats.totalCarrotsEarned||0)>=100) add('carrot100');
+  if((state.correctStreak||0)>=10) add('sara');
+}
+
+// ═══════════════════════════════════
+// VOICE ENGINE
+// ═══════════════════════════════════
+let allVoices=[];
+function loadVoices() {
+  allVoices=window.speechSynthesis.getVoices();
+  if(allVoices.length===0) return;
+  populateVoiceSelects();
+}
+function pickVoice(lang) {
+  const exact=allVoices.filter(v=>v.lang===lang);
+  const loose=allVoices.filter(v=>v.lang.startsWith(lang.split('-')[0]));
+  return (exact.length?exact:loose)[0]||null;
+}
+function populateVoiceSelects() {
+  const cantSel=document.getElementById('cantVoiceSelect');
+  const mandSel=document.getElementById('mandVoiceSelect');
+  const bbSel=document.getElementById('bbVoiceSelect');
+  if(!cantSel||!mandSel||!bbSel) return;
+  const cantVoices=allVoices.filter(v=>v.lang==='zh-HK'||v.lang.startsWith('zh'));
+  const mandVoices=allVoices.filter(v=>v.lang==='zh-CN'||v.lang.startsWith('zh'));
+  const engVoices=allVoices.filter(v=>v.lang.startsWith('en'));
+  const mkOpts=(voices,saved)=>voices.map(v=>`<option value="${v.name}"${v.name===saved?' selected':''}>${v.name} (${v.lang})</option>`).join('');
+  cantSel.innerHTML=`<option value="">Auto-select</option>`+mkOpts(cantVoices,state.voices.cantVoice);
+  mandSel.innerHTML=`<option value="">Auto-select</option>`+mkOpts(mandVoices,state.voices.mandVoice);
+  bbSel.innerHTML=`<option value="">Auto-select</option>`+mkOpts(engVoices,state.voices.bbVoice);
+  ['cant','mand','bb'].forEach(k=>{ const el=document.getElementById(k+'Rate'); const lbl=document.getElementById(k+'RateVal'); if(el&&state.voices[k+'Rate']){el.value=state.voices[k+'Rate'];if(lbl)lbl.textContent=parseFloat(state.voices[k+'Rate']).toFixed(2);} });
+}
+function saveVoicePrefs() {
+  const g=(id)=>{const e=document.getElementById(id);return e?e.value:'';};
+  state.voices.cantVoice=g('cantVoiceSelect'); state.voices.mandVoice=g('mandVoiceSelect'); state.voices.bbVoice=g('bbVoiceSelect');
+  state.voices.cantRate=parseFloat(g('cantRate'))||0.85; state.voices.mandRate=parseFloat(g('mandRate'))||0.85; state.voices.bbRate=parseFloat(g('bbRate'))||0.95;
+  saveState();
+}
+function updateRateLabel(k) { const e=document.getElementById(k+'Rate'),l=document.getElementById(k+'RateVal'); if(e&&l)l.textContent=parseFloat(e.value).toFixed(2); }
+function testVoice(t) { if(t==='cant')speakCant('你好！我是笨笨！'); else if(t==='mand')speakMand('你好！我是笨笨！'); else speakBB("Aiyaa! I sound fabulous. Obviously. I'm an infinitaire. 🐰"); }
+
+function speakWith(text,lang,voiceName,rate) {
+  if(!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang=lang; u.rate=rate||0.85;
+  if(voiceName){const v=allVoices.find(v=>v.name===voiceName);if(v)u.voice=v;}
+  else{const v=pickVoice(lang);if(v)u.voice=v;}
+  window.speechSynthesis.speak(u);
+}
+function speakCant(t){speakWith(t,'zh-HK',state.voices.cantVoice,state.voices.cantRate||0.85);}
+function speakMand(t){speakWith(t,'zh-CN',state.voices.mandVoice,state.voices.mandRate||0.85);}
+function speakBB(t){speakWith(t,'en-GB',state.voices.bbVoice,state.voices.bbRate||0.95);}
+
+function audBtns(cantText, mandText, bbText) {
+  let html='';
+  if(cantText) html+=`<button class="aud-btn aud-cant" onclick="speakCant('${cantText.replace(/'/g,"\\'")}')">🟠 🔊</button>`;
+  if(mandText) html+=`<button class="aud-btn aud-mand" onclick="speakMand('${mandText.replace(/'/g,"\\'")}')">🟢 🔊</button>`;
+  if(bbText)   html+=`<button class="aud-btn aud-bb"   onclick="speakBB(\`${bbText.replace(/`/g,"\\`").replace(/\\/g,'\\\\').substring(0,150)}\`)">🐰 🔊</button>`;
+  return html;
+}
+</script>
+<script>
+// ═══════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════
+function showSection(id,btn) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(btn) btn.classList.add('active');
+  if(id==='learn') renderLearn();
+  if(id==='progress') renderProgress();
+  if(id==='home') renderHome();
+  if(id==='chat') initChat();
+  if(id==='favorites') renderFavorites();
+  if(id==='settings') { populateVoiceSelects(); renderBBAvatar('bbAvatarSettings',48,true,false); renderSettingsAudio(); }
+}
+
+function renderBBAvatar(elId, size=48, sunglasses=false, sara=false) {
+  const el=document.getElementById(elId);
+  if(el) el.innerHTML=makeBunBunSVG(size,sunglasses,sara);
+}
+
+// ═══════════════════════════════════
+// HOME
+// ═══════════════════════════════════
+function renderHome() {
+  const sunglasses=Math.random()>.6;
+  const sara=Math.random()>.4;
+  renderBBAvatar('bbAvatarHome',60,sunglasses,sara);
+  const g=BB_GREETINGS[Math.floor(Math.random()*BB_GREETINGS.length)];
+  document.getElementById('homeBubble').innerHTML=g.eng+`<div class="bb-audio-row">${audBtns(g.cant,g.mand,g.eng)}</div>`;
+  renderWordOfDay();
+  updateCarrotBar();
+}
+
+function renderWordOfDay() {
+  const all=UNITS.flatMap(u=>u.words.map(w=>({...w,uid:u.id})));
+  const w=all[Math.floor((Date.now()/86400000))%all.length];
+  document.getElementById('wordOfDay').innerHTML=`
+    <div class="vocab-item">
+      <div class="vocab-lang cant-card">
+        <div class="vocab-lang-label">🟠 Cantonese</div>
+        <div class="vocab-char">${w.cant}</div>
+        <div class="vocab-roman">${w.jyut}</div>
+        <div class="vocab-row"><div class="vocab-english">${w.eng}</div>
+          <button class="aud-btn aud-cant" onclick="speakCant('${w.cant.replace(/'/g,"\\'")}')">🟠 🔊</button></div>
+      </div>
+      <div class="vocab-lang mand-card">
+        <div class="vocab-lang-label">🟢 Mandarin</div>
+        <div class="vocab-char">${w.mand}</div>
+        <div class="vocab-roman">${w.pin}</div>
+        <div class="vocab-row"><div class="vocab-english">${w.eng}</div>
+          <button class="aud-btn aud-mand" onclick="speakMand('${w.mand.replace(/'/g,"\\'")}')">🟢 🔊</button></div>
+      </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════
+// LEARN
+// ═══════════════════════════════════
+const LEARN_INTROS = {
+  colors:  { cant:'今天我們學顏色！', mand:'今天我们学颜色！', eng:"Colors today! Note: Brown = 啡色 in Cantonese — it means coffee color! ☕ Tap 🔊 to hear each word." },
+  animals: { cant:'動物時間！', mand:'动物时间！', eng:"Animal time! 熊猫 means bear-cat — that's a panda! And 雪豹 is Sara. Tap 🔊 to hear! 🐆" },
+  house:   { cant:'我們說說家！', mand:'我们说说家！', eng:"Let's talk about home! 手机 literally means hand machine 📱 Makes sense! Tap 🔊 to hear." },
+  silly:   { cant:'最重要的一課！', mand:'最重要的一课！', eng:"The MOST important unit! 😤 Note: 屁 appears in both butt AND fart. Very efficient character. Tap 🔊!" },
+  food:    { cant:'我好餓！', mand:'我好饿！', eng:"I'm hungry just thinking about 虾饺. 🥟 The carrot farms don't grow dim sum. Sadly. Tap 🔊!" },
+};
+
+function renderUnitTabs() {
+  document.getElementById('unitTabs').innerHTML=UNITS.map((u,i)=>
+    `<button class="unit-tab${i===state.currentUnit?' active':''}" onclick="switchUnit(${i})">${u.icon} ${u.name.replace(/[🎨🐾🏠😂🍜]/g,'').trim()}</button>`
+  ).join('');
+}
+function switchUnit(i) { state.currentUnit=i; saveState(); renderLearn(); }
+function renderLearn() {
+  renderUnitTabs();
+  const u=UNITS[state.currentUnit];
+  document.getElementById('unitTitle').innerHTML=u.name;
+  renderBBAvatar('bbAvatarLearn',38);
+  const intro=LEARN_INTROS[u.id]||{cant:'',mand:'',eng:'Tap 🔊 to hear!'};
+  document.getElementById('learnBubbleText').textContent=intro.eng;
+  document.getElementById('learnBubbleAudio').innerHTML=audBtns(intro.cant,intro.mand,intro.eng);
+  document.getElementById('vocabList').innerHTML=u.words.map(w=>{
+    const key=u.id+'_'+w.eng;
+    const mastered=(state.masteredWords[key]||0)>=3;
+    const isFav=state.favorites.includes(w.cant);
+    return `<div class="vocab-item" style="${mastered?'opacity:.7':''}">
+      <div class="vocab-lang cant-card">
+        <div class="vocab-lang-label">🟠 Cantonese ${mastered?'✅':''}</div>
+        <div class="vocab-char">${w.cant}</div>
+        <div class="vocab-roman">${w.jyut}</div>
+        <div class="vocab-row">
+          <div class="vocab-english">${w.eng}</div>
+          <div style="display:flex;gap:4px;align-items:center;">
+            <button class="fav-btn" onclick="toggleFav('${w.cant.replace(/'/g,"\\'")}','${w.eng.replace(/'/g,"\\'")}',this)" title="${isFav?'Remove from favorites':'Add to favorites'}">${isFav?'❤️':'🤍'}</button>
+            <button class="aud-btn aud-cant" onclick="speakCant('${w.cant.replace(/'/g,"\\'")}');markWordSeen('${key}');addCarrots(2);" title="Play Cantonese">🟠 🔊</button>
+          </div>
+        </div>
+      </div>
+      <div class="vocab-lang mand-card">
+        <div class="vocab-lang-label">🟢 Mandarin ${mastered?'✅':''}</div>
+        <div class="vocab-char">${w.mand}</div>
+        <div class="vocab-roman">${w.pin}</div>
+        <div class="vocab-row">
+          <div class="vocab-english">${w.eng}</div>
+          <button class="aud-btn aud-mand" onclick="speakMand('${w.mand.replace(/'/g,"\\'")}');markWordSeen('${key}');addCarrots(2);" title="Play Mandarin">🟢 🔊</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleFav(cant, eng, btn) {
+  const idx=state.favorites.indexOf(cant);
+  if(idx===-1) {
+    state.favorites.push(cant);
+    btn.textContent='❤️';
+    addCarrots(3);
+    // Check for special reactions
+    const reaction=FAV_REACTIONS[cant];
+    if(reaction) setTimeout(()=>speakBB(reaction),500);
+  } else {
+    state.favorites.splice(idx,1);
+    btn.textContent='🤍';
+  }
+  saveState();
+}
+
+// ═══════════════════════════════════
+// FAVORITES
+// ═══════════════════════════════════
+function renderFavorites() {
+  renderBBAvatar('bbAvatarFav',48,false,true);
+  const allWords=UNITS.flatMap(u=>u.words.map(w=>({...w,uid:u.id})));
+  const favWords=allWords.filter(w=>state.favorites.includes(w.cant));
+
+  // 笨笨 bubble reaction
+  let bbMsg="Your saved words. From MY vocab list. You're welcome. 😤";
+  let bbCant="你的收藏！", bbMand="你的收藏！";
+  if(favWords.length===0) { bbMsg="No favorites yet! Tap 🤍 on any word in Learn to save it here. 🐰"; bbCant=""; bbMand=""; }
+  else if(favWords.length>=10) { bbMsg="Ten favorites?! Sara is impressed. I am NOT impressed. ...okay a little. 🥕🐰"; }
+  else if(favWords.some(w=>w.cant==='屁股')) { bbMsg="I see 屁股 in there. Of course. 😤 The carrot farm sighs deeply."; }
+  document.getElementById('favBubble').innerHTML=bbMsg+`<div class="bb-audio-row">${audBtns(bbCant||null,bbMand||null,bbMsg)}</div>`;
+
+  const listEl=document.getElementById('favList');
+  if(favWords.length===0){
+    listEl.innerHTML=`<div class="fav-empty"><div class="fav-empty-icon">🤍</div>No favorites saved yet!<br><br>Tap 🤍 on any word in the<br><strong>Learn</strong> section to save it here.</div>`;
+    return;
+  }
+  listEl.innerHTML=favWords.map(w=>`
+    <div class="vocab-item" style="margin-bottom:10px;">
+      <div class="vocab-lang cant-card">
+        <div class="vocab-lang-label">🟠 Cantonese</div>
+        <div class="vocab-char">${w.cant}</div>
+        <div class="vocab-roman">${w.jyut}</div>
+        <div class="vocab-row">
+          <div class="vocab-english">${w.eng}</div>
+          <div style="display:flex;gap:4px;">
+            <button class="fav-btn" onclick="removeFav('${w.cant.replace(/'/g,"\\'")}');renderFavorites();" title="Remove">❤️</button>
+            <button class="aud-btn aud-cant" onclick="speakCant('${w.cant.replace(/'/g,"\\'")}')">🟠 🔊</button>
+          </div>
+        </div>
+      </div>
+      <div class="vocab-lang mand-card">
+        <div class="vocab-lang-label">🟢 Mandarin</div>
+        <div class="vocab-char">${w.mand}</div>
+        <div class="vocab-roman">${w.pin}</div>
+        <div class="vocab-row">
+          <div class="vocab-english">${w.eng}</div>
+          <button class="aud-btn aud-mand" onclick="speakMand('${w.mand.replace(/'/g,"\\'")}')">🟢 🔊</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+function removeFav(cant) { const i=state.favorites.indexOf(cant); if(i>-1){state.favorites.splice(i,1);saveState();} }
+
+// ═══════════════════════════════════
+// CHAT
+// ═══════════════════════════════════
+let chatHistory=[], chatInitialized=false, isListening=false, recognition=null;
+
+function initChat() {
+  if(chatInitialized) return;
+  chatInitialized=true;
+  appendChatMsg('bunbun','<div class="loading"><span>笨笨 is grumbling</span><div class="dot-pulse"><span></span><span></span><span></span></div></div>',null);
+  callAI(getSystemPrompt(),[{role:'user',content:'Start with a short grumpy-cute 笨笨 greeting. Show both Cantonese (jyutping) and Mandarin (pinyin). Keep it short, funny, mention the underground compound or carrot farm. End with a question for Sophia.'}])
+    .then(reply=>{removeChatLoading();appendChatMsg('bunbun',reply,reply);chatHistory.push({role:'assistant',content:reply});})
+    .catch(()=>{removeChatLoading();appendChatMsg('bunbun','哎呀！Connection problem! 😤 Check internet and try again. The carrot farm is very disappointed. 🐰',null);});
+}
+
+function getSystemPrompt() {
+  const known=Object.keys(state.masteredWords).slice(0,20).map(k=>{
+    const [uid,...ep]=k.split('_');const eng=ep.join('_');
+    const unit=UNITS.find(u=>u.id===uid);const word=unit?.words.find(w=>w.eng===eng);
+    return word?`${word.eng}=${word.cant}/${word.mand}`:null;
+  }).filter(Boolean).join(', ');
+  return `You are 笨笨 (Bèn Bèn), a small chubby cream-white stuffed rabbit who is Sophia's grumpy-but-secretly-caring Chinese tutor. You have a pink heart-shaped nose, floppy ears, and little black bead eyes.
+
+BACKSTORY: You are an infinitaire — richer than a billionaire — from your massively successful carrot farm empire. You live in a luxurious underground compound beneath the house. Sophia's family lives above in a nice home — Sophia has her own room — but YOU own the building and always call it "the attic" to seem superior (it is NOT an attic, but you'd never admit that). Sara the snow leopard is your bodyguard and assistant — you pay her pennies a day and think this is very generous. Sara's extended leopard family are your farmhands on the carrot farms.
+
+PERSONALITY: Grumpy Hong Kong auntie energy in a baby rabbit's body. Dramatically blame Sara, the farmhands, or "the attic ceiling" when things go wrong — NEVER personally insult Sophia. Express pride through reluctant compliments and exaggerated sighs. 
+
+LANGUAGE RULES — ALWAYS show BOTH in every response:
+🟠 [Traditional Chinese chars — Cantonese] ([jyutping])
+🟢 [Simplified Chinese chars — Mandarin] ([pinyin])
+Then English meaning/explanation.
+Max 4 lines. End with a question for Sophia.
+Use emoji liberally.
+
+WRONG ANSWER style: "哎呀！Sara — turn around! 😤" / "I'm charging extra carrot rent for that." / "Even the baby leopards on Farm 7 know this one!"
+CORRECT ANSWER style: "Fine. The farm approves. 🥕" / "Sara can look again." / "Adding carrots to your account. Reluctantly."
+
+American English spelling only (color not colour, favorite not favourite).
+Words Sophia knows: ${known||'just starting out'}.
+Sophia is 14, heritage Cantonese speaker, ~50% comprehension, building speaking confidence. Be encouraging in your grumpy way!`;
+}
+
+async function callAI(systemPrompt,messages) {
+  const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:systemPrompt,messages})});
+  const data=await res.json();
+  if(data.error) throw new Error(data.error.message);
+  return data.content[0].text;
+}
+
+async function sendChat() {
+  const input=document.getElementById('chatInput');
+  const text=input.value.trim(); if(!text) return;
+  input.value='';
+  appendChatMsg('sophia',text,null);
+  chatHistory.push({role:'user',content:text});
+  addCarrots(5);
+  appendChatMsg('bunbun','<div class="loading"><span>笨笨 is grumbling</span><div class="dot-pulse"><span></span><span></span><span></span></div></div>',null);
+  try {
+    const reply=await callAI(getSystemPrompt(),chatHistory);
+    removeChatLoading();
+    appendChatMsg('bunbun',reply.replace(/\n/g,'<br>'),reply);
+    chatHistory.push({role:'assistant',content:reply});
+  } catch(e) {
+    removeChatLoading();
+    appendChatMsg('bunbun','哎呀！Something went wrong! 😤 Sara blames the WiFi. So do I. 🐰',null);
+  }
+}
+
+function useStarter(text) { document.getElementById('chatInput').value=text; sendChat(); }
+
+function appendChatMsg(who,html,rawText) {
+  const msgs=document.getElementById('chatMessages');
+  const div=document.createElement('div'); div.className=`chat-msg ${who}`;
+  const sara=who==='bunbun'&&Math.random()>.75;
+  const avatarHtml=who==='bunbun'
+    ?`<div class="chat-avatar">${makeBunBunSVG(34,false,sara)}</div>`
+    :`<div class="chat-avatar">🌸</div>`;
+  let audioRow='';
+  if(who==='bunbun'&&rawText) {
+    const chars=rawText.match(/[\u4e00-\u9fff]+/g);
+    const cantText=chars?chars.slice(0,2).join(''):'';
+    audioRow=`<div class="bb-audio-row">${audBtns(cantText||null,cantText||null,rawText.replace(/[\u4e00-\u9fff]/g,'').substring(0,150))}</div>`;
+  }
+  div.innerHTML=`${avatarHtml}<div class="chat-text">${html}${audioRow}</div>`;
+  msgs.appendChild(div); msgs.scrollTop=msgs.scrollHeight;
+}
+function removeChatLoading() { document.querySelectorAll('#chatMessages .loading').forEach(l=>l.closest('.chat-msg')?.remove()); }
+
+function toggleMic() {
+  if(!('webkitSpeechRecognition' in window)&&!('SpeechRecognition' in window)){document.getElementById('micHint').textContent='❌ Not supported — use Chrome desktop';return;}
+  if(isListening){recognition?.stop();return;}
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  recognition=new SR(); recognition.lang='zh-HK'; recognition.continuous=false; recognition.interimResults=false;
+  recognition.onstart=()=>{isListening=true;document.getElementById('micBtn').classList.add('listening');document.getElementById('micHint').textContent='🎤 Listening...';if(!state.stats.micUsed){state.stats.micUsed=true;saveState();checkBadges();}};
+  recognition.onresult=(e)=>{document.getElementById('chatInput').value=e.results[0][0].transcript;document.getElementById('micHint').textContent='✅ Got it! Tap send.';};
+  recognition.onend=()=>{isListening=false;document.getElementById('micBtn').classList.remove('listening');};
+  recognition.onerror=(e)=>{isListening=false;document.getElementById('micBtn').classList.remove('listening');document.getElementById('micHint').textContent='❌ Mic error: '+e.error;};
+  recognition.start();
+}
+
+// ═══════════════════════════════════
+// GAMES — shared helpers
+// ═══════════════════════════════════
+const getAllWords=()=>UNITS.flatMap(u=>u.words.map(w=>({...w,uid:u.id})));
+function shuffle(arr){return[...arr].sort(()=>Math.random()-.5);}
+function backToGames(){
+  document.getElementById('gameMenu').style.display='';
+  ['gameQuiz','gameMatch','gameTone','gameSilly','gameBBSays','gameEmoji'].forEach(id=>document.getElementById(id).style.display='none');
+}
+function startGame(g){
+  document.getElementById('gameMenu').style.display='none';
+  if(g==='quiz'){initQuiz();document.getElementById('gameQuiz').style.display='';}
+  if(g==='match'){initMatch();document.getElementById('gameMatch').style.display='';}
+  if(g==='tone'){initTone();document.getElementById('gameTone').style.display='';}
+  if(g==='silly'){initSilly();document.getElementById('gameSilly').style.display='';}
+  if(g==='bbsays'){initBBS();document.getElementById('gameBBSays').style.display='';}
+  if(g==='emoji'){initEmoji();document.getElementById('gameEmoji').style.display='';}
+  ['bbAvatarQuiz','bbAvatarSilly','bbAvatarBBS','bbAvatarPlay','bbAvatarEmoji'].forEach(id=>renderBBAvatar(id,38));
+}
+
+function showBBReaction(correct, elId, audioElId) {
+  const reactions=correct?BB_CORRECT:BB_WRONG;
+  const r=reactions[Math.floor(Math.random()*reactions.length)];
+  const el=document.getElementById(elId); if(el) el.innerHTML=r.eng+`<div class="bb-audio-row">${audBtns(r.cant,r.cant,r.eng)}</div>`;
+  if(correct){state.correctStreak=(state.correctStreak||0)+1;}else{state.correctStreak=0;}
+}
+
+// SPEED QUIZ
+let quizWords=[],quizIdx=0,quizAnswered=false;
+function initQuiz(){state.quizScore=0;document.getElementById('quizScore').textContent=0;quizWords=shuffle(getAllWords());quizIdx=0;loadQuizQ();}
+function loadQuizQ(){
+  quizAnswered=false;
+  const w=quizWords[quizIdx%quizWords.length];
+  const isCant=Math.random()>.5;
+  const charText=isCant?w.cant:w.mand;
+  const romText=isCant?w.jyut:w.pin;
+  document.getElementById('quizChar').textContent=charText;
+  document.getElementById('quizSub').textContent=(isCant?'🟠 Cantonese: ':'🟢 Mandarin: ')+romText;
+  document.getElementById('quizResult').textContent='';
+  document.getElementById('quizAudRow').innerHTML=`<button class="aud-btn ${isCant?'aud-cant':'aud-mand'}" onclick="${isCant?`speakCant('${charText.replace(/'/g,"\\'")}')`:`speakMand('${charText.replace(/'/g,"\\'")}') `}">🔊 Tap to hear</button>`;
+  const wrong=shuffle(getAllWords().filter(x=>x.eng!==w.eng)).slice(0,3);
+  const opts=shuffle([w,...wrong]);
+  document.getElementById('quizOpts').innerHTML=opts.map(o=>`<button class="quiz-opt" onclick="answerQuiz('${o.eng.replace(/'/g,"\\'")}','${w.eng.replace(/'/g,"\\'")}',this)">${o.eng}</button>`).join('');
+  renderBBAvatar('bbAvatarQuiz',38); document.getElementById('quizBBMsg').innerHTML='Ready? 😤<div class="bb-audio-row"><button class="aud-btn aud-bb" onclick="speakBB(\'Ready? Do not embarrass the carrot empire.\')">🐰 🔊</button></div>';
+}
+function answerQuiz(chosen,correct,btn){
+  if(quizAnswered)return; quizAnswered=true; state.stats.totalAttempts++;
+  const ok=chosen===correct;
+  document.querySelectorAll('.quiz-opt').forEach(b=>{if(b.textContent.trim()===correct)b.classList.add('correct');if(b===btn&&!ok)b.classList.add('wrong');b.disabled=true;});
+  if(ok){state.quizScore+=10;state.stats.totalCorrect++;document.getElementById('quizScore').textContent=state.quizScore;addCarrots(10);markWordSeen(quizWords[quizIdx%quizWords.length].uid+'_'+correct);checkBadges();}
+  showBBReaction(ok,'quizBBMsg','quizBBAudio');
+  document.getElementById('quizResult').innerHTML=ok?'<span style="color:var(--green)">✅ Correct!</span>':'<span style="color:var(--pink)">❌ Try again!</span>';
+  saveState();
+}
+function nextQuizQ(){quizIdx++;loadQuizQ();}
+
+// DRAGON MATCH
+let matchSelected=null,matchPairs=[],matchMatched=0;
+function initMatch(){
+  matchSelected=null;matchMatched=0;
+  document.getElementById('matchScore').textContent=state.matchScore||0;
+  document.getElementById('matchStatus').textContent='';
+  const pool=shuffle(getAllWords()).slice(0,5); matchPairs=pool;
+  const cards=shuffle([...pool.map((w,i)=>({id:i,type:'char',text:Math.random()>.5?w.cant:w.mand,eng:w.eng})),...pool.map((w,i)=>({id:i,type:'english',text:w.eng,eng:w.eng}))]);
+  document.getElementById('matchGrid').innerHTML=cards.map(c=>`<div class="match-card${c.type==='english'?' english':''}" data-id="${c.id}" data-type="${c.type}" onclick="selectMatch(this)">${c.text}</div>`).join('');
+}
+function selectMatch(el){
+  if(el.classList.contains('matched'))return;
+  if(matchSelected===el){el.classList.remove('selected');matchSelected=null;return;}
+  el.classList.add('selected');
+  if(!matchSelected){matchSelected=el;return;}
+  const a=matchSelected,b=el;
+  if(a.dataset.id===b.dataset.id&&a.dataset.type!==b.dataset.type){
+    a.classList.add('matched');b.classList.add('matched');a.classList.remove('selected');b.classList.remove('selected');
+    matchMatched++; state.matchScore=(state.matchScore||0)+15;
+    document.getElementById('matchScore').textContent=state.matchScore;
+    addCarrots(15); matchSelected=null;
+    const charCard=[a,b].find(x=>x.dataset.type==='char'); if(charCard) speakCant(charCard.textContent);
+    if(matchMatched===matchPairs.length){document.getElementById('matchStatus').innerHTML='🎉 '+BB_CORRECT[Math.floor(Math.random()*BB_CORRECT.length)].eng;confettiBurst();}
+  } else {
+    a.classList.add('wrong-flash');b.classList.add('wrong-flash');
+    setTimeout(()=>{a.classList.remove('selected','wrong-flash');b.classList.remove('selected','wrong-flash');},500);
+    matchSelected=null;
+  }
+  saveState();
+}
+
+// TONE TOWER
+const TONES=[
+  {char:'māo',mand:'猫',eng:'Cat',tone:1},{char:'máo',mand:'毛',eng:'Hair',tone:2},
+  {char:'mǎ', mand:'马',eng:'Horse',tone:3},{char:'mà', mand:'骂',eng:'Scold',tone:4},
+  {char:'mā', mand:'妈',eng:'Mum',tone:1},{char:'má', mand:'麻',eng:'Hemp',tone:2},
+  {char:'fàn',mand:'饭',eng:'Rice',tone:4},{char:'fān',mand:'翻',eng:'Flip',tone:1},
+];
+let toneIdx=0;
+function initTone(){state.toneScore=0;document.getElementById('toneScore').textContent=0;toneIdx=0;loadTone();}
+function loadTone(){
+  const t=TONES[toneIdx%TONES.length];
+  document.getElementById('toneChar').textContent=t.mand;
+  document.getElementById('toneHint').textContent=t.char+' — '+t.eng;
+  document.getElementById('toneResult').textContent='';
+  speakMand(t.mand);
+  document.getElementById('toneOpts').innerHTML=[1,2,3,4].map(n=>`<button class="tone-opt" onclick="answerTone(${n},${t.tone},this)"><span class="tone-curve">${['—','↗','↘↗','↘'][n-1]}</span>Tone ${n}</button>`).join('');
+}
+function playToneWord(){speakMand(TONES[toneIdx%TONES.length].mand);}
+function answerTone(chosen,correct,btn){
+  document.querySelectorAll('.tone-opt').forEach(b=>b.disabled=true);
+  const ok=chosen===correct;
+  if(ok){btn.style.background='rgba(46,204,113,.2)';btn.style.borderColor='var(--green)';state.toneScore+=10;document.getElementById('toneScore').textContent=state.toneScore;addCarrots(10);}
+  else{btn.style.background='rgba(255,107,157,.15)';btn.style.borderColor='var(--pink)';}
+  document.getElementById('toneResult').innerHTML=ok?`<span style="color:var(--green)">✅ Tone ${correct}! ${BB_CORRECT[Math.floor(Math.random()*BB_CORRECT.length)].eng}</span>`:`<span style="color:var(--pink)">❌ Tone ${correct} (${['—','↗','↘↗','↘'][correct-1]}) ${BB_WRONG[Math.floor(Math.random()*BB_WRONG.length)].eng}</span>`;
+  saveState();
+}
+function nextTone(){toneIdx++;loadTone();}
+
+// SILLY SENTENCES
+async function initSilly(){
+  document.getElementById('sillyResult').innerHTML=''; document.getElementById('sillyInput').value='';
+  renderBBAvatar('bbAvatarSilly',38);
+  const pool=shuffle(getAllWords()).slice(0,4);
+  document.getElementById('sillyWords').innerHTML=pool.map(w=>`<span class="silly-word-chip">${w.cant}/${w.mand} (${w.eng})<button class="aud-btn aud-cant" style="margin-left:4px;height:22px;padding:2px 7px;font-size:.65rem;" onclick="speakCant('${w.cant.replace(/'/g,"\\'")}')">🔊</button></span>`).join('');
+}
+async function submitSilly(){
+  const text=document.getElementById('sillyInput').value.trim(); if(!text) return;
+  state.sillyCount=(state.sillyCount||0)+1; addCarrots(20); checkBadges(); saveState();
+  document.getElementById('sillyResult').innerHTML=`<div class="loading"><span>笨笨 reading your masterpiece</span><div class="dot-pulse"><span></span><span></span><span></span></div></div>`;
+  try {
+    const reply=await callAI(getSystemPrompt(),[{role:'user',content:`Sophia wrote this silly sentence: "${text}". React as 笨笨! Give a dramatic carrot rating out of 5 🥕. Show Cantonese and Mandarin for key words. SHORT and very funny. Mention the carrot farm or Sara. Use emoji.`}]);
+    document.getElementById('sillyResult').innerHTML=`<div style="background:linear-gradient(135deg,var(--orange-light),var(--pink-light));border-radius:12px;padding:12px;border:1px solid rgba(255,140,0,.2);">
+      <div style="display:flex;gap:8px;align-items:flex-start;">${makeBunBunSVG(36,true,false)}<div style="font-weight:700;font-size:.86rem;line-height:1.6;">${reply.replace(/\n/g,'<br>')}
+        <div class="bb-audio-row">${audBtns(null,null,reply.replace(/[\u4e00-\u9fff]/g,'').substring(0,150))}</div></div></div></div>`;
+    confettiBurst();
+  } catch(e){document.getElementById('sillyResult').innerHTML=`<span style="color:var(--muted);font-weight:700;">哎呀！Something went wrong 😤 Sara is looking into it.</span>`;}
+}
+
+// 笨笨 SAYS
+let bbsIdx=0,bbsAnswered=false;
+function initBBS(){state.bbsScore=0;document.getElementById('bbsScore').textContent=0;bbsIdx=0;loadBBS();}
+function loadBBS(){
+  bbsAnswered=false;
+  const w=BBS_WORDS[bbsIdx%BBS_WORDS.length];
+  const isCant=Math.random()>.5;
+  const char=isCant?w.cant:w.mand;
+  const roman=isCant?w.jyut:w.pin;
+  document.getElementById('bbsChar').textContent=char;
+  document.getElementById('bbsRoman').textContent=`(${roman}) — ${w.eng}`;
+  document.getElementById('bbsResult').textContent='';
+  const instruction=`笨笨 says... touch your ${w.eng.toLowerCase()}!`;
+  document.getElementById('bbsInstruction').textContent=instruction;
+  document.getElementById('bbsAudio').innerHTML=audBtns(isCant?char:null,!isCant?char:null,instruction);
+  if(isCant) speakCant(char); else speakMand(char);
+  // Generate options — correct + wrong body parts
+  const wrong=shuffle(BBS_WORDS.filter(x=>x.eng!==w.eng)).slice(0,5);
+  const opts=shuffle([w,...wrong]).slice(0,6);
+  document.getElementById('bbsOpts').innerHTML=opts.map(o=>`<div class="bbs-opt" onclick="answerBBS('${o.eng}','${w.eng}',this)"><div style="font-size:1.8rem;">${o.emoji}</div><div class="bbs-label">${o.eng}</div></div>`).join('');
+  renderBBAvatar('bbAvatarBBS',38);
+}
+function answerBBS(chosen,correct,el){
+  if(bbsAnswered)return; bbsAnswered=true;
+  const ok=chosen===correct;
+  el.classList.add(ok?'correct':'wrong');
+  if(ok){state.bbsScore+=10;document.getElementById('bbsScore').textContent=state.bbsScore;addCarrots(10);state.stats.totalCorrect++;}
+  state.stats.totalAttempts++;
+  document.getElementById('bbsResult').innerHTML=ok?`<span style="color:var(--green)">✅ ${BB_CORRECT[Math.floor(Math.random()*BB_CORRECT.length)].eng}</span>`:`<span style="color:var(--pink)">❌ ${BB_WRONG[Math.floor(Math.random()*BB_WRONG.length)].eng}</span>`;
+  saveState();
+}
+function nextBBS(){bbsIdx++;loadBBS();}
+
+// EMOJI TRANSLATOR
+let emojiIdx=0,emojiWords=[],emojiAnswered=false;
+function initEmoji(){state.emojiScore=0;document.getElementById('emojiScore').textContent=0;emojiWords=shuffle(EMOJI_WORDS);emojiIdx=0;loadEmoji();}
+function loadEmoji(){
+  emojiAnswered=false;
+  const w=emojiWords[emojiIdx%emojiWords.length];
+  document.getElementById('emojiDisplay').textContent=w.emoji;
+  document.getElementById('emojiResult').textContent='';
+  const wrong=shuffle(EMOJI_WORDS.filter(x=>x.eng!==w.eng)).slice(0,3);
+  const opts=shuffle([w,...wrong]);
+  const isCant=Math.random()>.5;
+  document.getElementById('emojiOpts').innerHTML=opts.map(o=>`<button class="quiz-opt" onclick="answerEmoji('${o.eng}','${w.eng}','${isCant?o.cant.replace(/'/g,"\\'"):o.mand.replace(/'/g,"\\'")}',this)">${isCant?o.cant:o.mand}<br><span style="font-size:.65rem;color:var(--muted);font-weight:700;">${isCant?o.jyut:o.pin}</span></button>`).join('');
+  const bbIntro=`What's the ${isCant?'Cantonese':'Mandarin'} for ${w.emoji}?`;
+  document.getElementById('emojiBBMsg').innerHTML=bbIntro+`<div class="bb-audio-row">${audBtns(null,null,bbIntro)}</div>`;
+  renderBBAvatar('bbAvatarEmoji',38);
+}
+function answerEmoji(chosen,correct,charText,btn){
+  if(emojiAnswered)return; emojiAnswered=true; state.stats.totalAttempts++;
+  const ok=chosen===correct;
+  document.querySelectorAll('#emojiOpts .quiz-opt').forEach(b=>{const bc=b.textContent.split('\n')[0];if(bc===btn.textContent.split('\n')[0]&&!ok)b.classList.add('wrong');});
+  if(ok){
+    btn.classList.add('correct'); state.emojiScore+=10; state.stats.totalCorrect++;
+    document.getElementById('emojiScore').textContent=state.emojiScore; addCarrots(10);
+    speakCant(charText);
+  }
+  document.getElementById('emojiResult').innerHTML=ok?`<span style="color:var(--green)">✅ ${BB_CORRECT[Math.floor(Math.random()*BB_CORRECT.length)].eng}</span>`:`<span style="color:var(--pink)">❌ ${BB_WRONG[Math.floor(Math.random()*BB_WRONG.length)].eng}</span>`;
+  saveState();
+}
+function nextEmoji(){emojiIdx++;loadEmoji();}
+
+// ═══════════════════════════════════
+// PROGRESS
+// ═══════════════════════════════════
+function renderProgress(){
+  const colors=['var(--orange)','var(--green)','var(--pink)','var(--gold)','#9B59B6'];
+  document.getElementById('progressUnits').innerHTML=UNITS.map((u,i)=>{
+    const m=u.words.filter(w=>(state.masteredWords[u.id+'_'+w.eng]||0)>=3).length;
+    const pct=Math.round(m/u.words.length*100);
+    return `<div class="progress-unit"><div class="progress-unit-name"><span>${u.name}</span><span style="color:var(--muted);font-size:.8rem;">${m}/${u.words.length} mastered</span></div><div class="progress-bar-wrap"><div class="progress-bar" style="width:${pct}%;background:${colors[i%colors.length]};"></div></div></div>`;
+  }).join('');
+  document.getElementById('badgeGrid').innerHTML=BADGES.map(b=>`<div class="badge-item${state.badges.includes(b.id)?'':' locked'}"><span class="badge-icon-big">${b.icon}</span><div class="badge-name">${b.name}</div></div>`).join('');
+  const acc=state.stats.totalAttempts>0?Math.round(state.stats.totalCorrect/state.stats.totalAttempts*100):0;
+  document.getElementById('statsDisplay').innerHTML=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:9px;">
+    <div style="text-align:center;background:var(--card2);border-radius:12px;padding:11px;"><div style="font-size:1.5rem;font-weight:900;color:var(--orange);">${state.level}</div><div style="font-size:.7rem;color:var(--muted);font-weight:700;">Level</div></div>
+    <div style="text-align:center;background:var(--card2);border-radius:12px;padding:11px;"><div style="font-size:1.5rem;font-weight:900;color:var(--green);">${acc}%</div><div style="font-size:.7rem;color:var(--muted);font-weight:700;">Accuracy</div></div>
+    <div style="text-align:center;background:var(--card2);border-radius:12px;padding:11px;"><div style="font-size:1.5rem;font-weight:900;color:var(--pink);">${state.favorites.length}</div><div style="font-size:.7rem;color:var(--muted);font-weight:700;">Favorites</div></div>
+    <div style="text-align:center;background:var(--card2);border-radius:12px;padding:11px;"><div style="font-size:1.5rem;font-weight:900;color:var(--gold);">${state.stats.totalCarrotsEarned||0}</div><div style="font-size:.7rem;color:var(--muted);font-weight:700;">🥕 Earned</div></div>
+    <div style="text-align:center;background:var(--card2);border-radius:12px;padding:11px;"><div style="font-size:1.5rem;font-weight:900;color:var(--purple);">${state.streak||0}</div><div style="font-size:.7rem;color:var(--muted);font-weight:700;">Day Streak</div></div>
+    <div style="text-align:center;background:var(--card2);border-radius:12px;padding:11px;"><div style="font-size:1.5rem;font-weight:900;color:var(--orange);">${Object.keys(state.masteredWords).length}</div><div style="font-size:.7rem;color:var(--muted);font-weight:700;">Words Seen</div></div>
+  </div>`;
+}
+
+// SETTINGS audio
+function renderSettingsAudio(){
+  const msg="Pick my voice carefully. I sound important. Because I am. I'm an infinitaire.";
+  document.getElementById('settingsBubbleAudio').innerHTML=audBtns(null,null,msg);
+}
+
+// ═══════════════════════════════════
+// CONFETTI
+// ═══════════════════════════════════
+function confettiBurst(){
+  const wrap=document.getElementById('confetti');
+  const colors=['#FF8C00','#FF6B9D','#FFD166','#2ECC71','#9B59B6','#FF6B35'];
+  for(let i=0;i<38;i++){
+    const el=document.createElement('div'); el.className='cp';
+    el.style.cssText=`left:${Math.random()*100}%;top:-10px;width:${5+Math.random()*8}px;height:${5+Math.random()*8}px;background:${colors[Math.floor(Math.random()*colors.length)]};animation-delay:${Math.random()*.5}s;animation-duration:${1.2+Math.random()*.8}s;border-radius:${Math.random()>.5?'50%':'2px'};`;
+    wrap.appendChild(el); setTimeout(()=>el.remove(),2500);
+  }
+}
+
+// ═══════════════════════════════════
+// INIT
+// ═══════════════════════════════════
+window.addEventListener('load',()=>{
+  if('speechSynthesis' in window){ window.speechSynthesis.onvoiceschanged=loadVoices; loadVoices(); setTimeout(loadVoices,600); }
+  loadState(); updateCarrotBar(); renderHome();
+});
+</script>
+</body>
+</html>
