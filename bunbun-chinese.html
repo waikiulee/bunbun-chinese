@@ -1301,7 +1301,7 @@ Sophia is 14, heritage Cantonese speaker, ~50% comprehension, building speaking 
 
 async function callAI(systemPrompt,messages) {
   try {
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':'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','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:systemPrompt,messages})});
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':'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','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:systemPrompt,messages})});
     const data=await res.json();
     if(data.error) throw new Error('API error: '+data.error.message+' (type: '+data.error.type+')');
     return data.content[0].text;
