@@ -675,26 +675,26 @@ function makeBunBunSVG(size=60, sunglasses=false, saraToo=false, muumuu=false) {
     <ellipse cx="68" cy="80" rx="10" ry="8" fill="#F0EAD8" opacity=".6"/>
     <ellipse cx="50" cy="75" rx="12" ry="9" fill="#F2ECE0" opacity=".5"/>
 
-    <!-- Head — round, fluffy -->
-    <circle cx="50" cy="54" r="36" fill="#EDE6D2" stroke="#DDD0BA" stroke-width="1.5"/>
+    <!-- Head — wide, chubby, cushion-shaped -->
+    <ellipse cx="50" cy="56" rx="40" ry="32" fill="#EDE6D2" stroke="#DDD0BA" stroke-width="1.5"/>
     <!-- Fluffy texture on head -->
-    <circle cx="50" cy="54" r="33" fill="#F0EAD8" opacity=".3"/>
-    <ellipse cx="35" cy="42" rx="9" ry="7" fill="#F2EEE2" opacity=".4"/>
-    <ellipse cx="65" cy="42" rx="9" ry="7" fill="#F2EEE2" opacity=".4"/>
+    <ellipse cx="50" cy="56" rx="37" ry="29" fill="#F0EAD8" opacity=".3"/>
+    <ellipse cx="35" cy="44" rx="9" ry="7" fill="#F2EEE2" opacity=".4"/>
+    <ellipse cx="65" cy="44" rx="9" ry="7" fill="#F2EEE2" opacity=".4"/>
 
-    <!-- Eyes — large black bead eyes with shine -->
-    <circle cx="38" cy="50" r="5.5" fill="#1A1A1A"/>
-    <circle cx="39.8" cy="48.4" r="1.6" fill="white"/>
-    <circle cx="62" cy="50" r="5.5" fill="#1A1A1A"/>
-    <circle cx="63.8" cy="48.4" r="1.6" fill="white"/>
+    <!-- Eyes — small black beads like real 笨笨 -->
+    <circle cx="37" cy="50" r="3.5" fill="#1A1A1A"/>
+    <circle cx="38.2" cy="48.8" r="1" fill="white"/>
+    <circle cx="63" cy="50" r="3.5" fill="#1A1A1A"/>
+    <circle cx="64.2" cy="48.8" r="1" fill="white"/>
 
-    <!-- Big heart nose — prominent, pink, like real 笨笨 -->
-    <path d="M50 67 C46 61,40 61,40 67 C40 72,50 79,50 79 C50 79,60 72,60 67 C60 61,54 61,50 67Z" fill="#F08098"/>
-    <path d="M50 67 C47 63,43 63,43 67 C43 70,50 76,50 76 C50 76,57 70,57 67 C57 63,53 63,50 67Z" fill="#FF9EB5"/>
-    <!-- Nose highlight -->
-    <ellipse cx="46" cy="66" rx="3" ry="2" fill="white" opacity=".35"/>
-    <!-- Chin drip line like real photo -->
-    <line x1="50" y1="79" x2="50" y2="83" stroke="#F08098" stroke-width="1.5" stroke-linecap="round" opacity=".6"/>
+    <!-- Nose — flat, wider at top, curves inward toward bottom -->
+    <path d="M40 59 Q50 56 60 59 Q58 66 50 68 Q42 66 40 59Z" fill="#F08098"/>
+    <path d="M41 59 Q50 57 59 59 Q57 64 50 66 Q43 64 41 59Z" fill="#FFB3C6"/>
+    <!-- Highlight -->
+    <ellipse cx="45" cy="60" rx="3" ry="1.5" fill="white" opacity=".3"/>
+    <!-- Chin line -->
+    <line x1="50" y1="68" x2="50" y2="71" stroke="#F08098" stroke-width="1.2" stroke-linecap="round" opacity=".5"/>
 
     <!-- Arms -->
     <ellipse cx="17" cy="84" rx="9" ry="14" fill="#EDE6D2" stroke="#DDD0BA" stroke-width="1"/>
@@ -1366,7 +1366,7 @@ function appendChatMsg(who,html,rawText) {
   const div=document.createElement('div'); div.className=`chat-msg ${who}`;
   const sara=who==='bunbun'&&Math.random()>.75;
   const avatarHtml=who==='bunbun'
-    ?`<div class="chat-avatar">${makeBunBunSVG(34,false,sara)}</div>`
+    ?`<div class="chat-avatar">${makeBunBunSVG(34,false,sara,Math.random()<.3)}</div>`
     :`<div class="chat-avatar">🌸</div>`;
   let audioRow='';
   if(who==='bunbun'&&rawText) {
