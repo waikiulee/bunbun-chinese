@@ -579,6 +579,18 @@ function makeBunBunSVG — defined in JS below
       ⚠️ <strong>Safari / iOS:</strong> Limited voice options — Edge or Chrome on desktop gives the best results.<br>
       ⚠️ <strong>Voices load after first page interaction</strong> — if the list is empty, tap anywhere first then reopen this tab.
     </div>
+
+    <div class="voice-section" style="margin-top:14px;">
+      <h3 style="color:var(--muted);">🔑 Claude API Key</h3>
+      <p style="font-size:.78rem;color:var(--muted);margin-bottom:8px;">Paste your Anthropic API key here. It's saved only on this device — never uploaded anywhere. Required for Chat. 🐰</p>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <input id="apiKeyInput" type="password" placeholder="sk-ant-api03-..." 
+          style="flex:1;padding:9px 12px;border-radius:99px;border:2px solid var(--card2);background:var(--card2);font-family:'Nunito',sans-serif;font-size:.8rem;color:var(--text);outline:none;"
+          oninput="saveApiKey()"/>
+        <button onclick="toggleApiKeyVis()" style="background:var(--card2);border:none;border-radius:99px;padding:9px 13px;cursor:pointer;font-size:.85rem;">👁</button>
+      </div>
+      <div id="apiKeyStatus" style="font-size:.75rem;font-weight:800;margin-top:6px;padding-left:4px;"></div>
+    </div>
   </div>
 </section>
 
@@ -1029,7 +1041,21 @@ function populateVoiceSelects() {
   bbSel.innerHTML=`<option value="">Auto-select</option>`+mkOpts(engVoices,state.voices.bbVoice);
   ['cant','mand','bb'].forEach(k=>{ const el=document.getElementById(k+'Rate'); const lbl=document.getElementById(k+'RateVal'); if(el&&state.voices[k+'Rate']){el.value=state.voices[k+'Rate'];if(lbl)lbl.textContent=parseFloat(state.voices[k+'Rate']).toFixed(2);} });
 }
-function saveVoicePrefs() {
+function saveApiKey() {
+  const val=document.getElementById('apiKeyInput').value.trim();
+  if(val) { localStorage.setItem('bunbun_api_key',val); document.getElementById('apiKeyStatus').innerHTML='<span style="color:var(--green);">✅ Key saved!</span>'; }
+  else { localStorage.removeItem('bunbun_api_key'); document.getElementById('apiKeyStatus').innerHTML='<span style="color:var(--muted);">No key saved.</span>'; }
+}
+function toggleApiKeyVis() {
+  const inp=document.getElementById('apiKeyInput');
+  inp.type=inp.type==='password'?'text':'password';
+}
+function loadApiKeyField() {
+  const key=localStorage.getItem('bunbun_api_key')||'';
+  const inp=document.getElementById('apiKeyInput');
+  if(inp) { inp.value=key; document.getElementById('apiKeyStatus').innerHTML=key?'<span style="color:var(--green);">✅ Key saved on this device.</span>':'<span style="color:var(--muted);">No key yet — paste one above.</span>'; }
+}
+
   const g=(id)=>{const e=document.getElementById(id);return e?e.value:'';};
   state.voices.cantVoice=g('cantVoiceSelect'); state.voices.mandVoice=g('mandVoiceSelect'); state.voices.bbVoice=g('bbVoiceSelect');
   state.voices.cantRate=parseFloat(g('cantRate'))||0.85; state.voices.mandRate=parseFloat(g('mandRate'))||0.85; state.voices.bbRate=parseFloat(g('bbRate'))||0.95;
@@ -1073,7 +1099,7 @@ function showSection(id,btn) {
   if(id==='home') renderHome();
   if(id==='chat') initChat();
   if(id==='favorites') renderFavorites();
-  if(id==='settings') { populateVoiceSelects(); renderBBAvatar('bbAvatarSettings',48,true,false); renderSettingsAudio(); }
+  if(id==='settings') { populateVoiceSelects(); renderBBAvatar('bbAvatarSettings',48,true,false); renderSettingsAudio(); loadApiKeyField(); }
 }
 
 function renderBBAvatar(elId, size=48, sunglasses=false, sara=false, muumuu=false) {
@@ -1301,7 +1327,9 @@ Sophia is 14, heritage Cantonese speaker, ~50% comprehension, building speaking 
 
 async function callAI(systemPrompt,messages) {
   try {
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':'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','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:systemPrompt,messages})});
+    const apiKey=localStorage.getItem('bunbun_api_key')||'';
+    if(!apiKey) throw new Error('No API key set — please add it in the ⚙️ Voices tab.');
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:systemPrompt,messages})});
     const data=await res.json();
     if(data.error) throw new Error('API error: '+data.error.message+' (type: '+data.error.type+')');
     return data.content[0].text;
