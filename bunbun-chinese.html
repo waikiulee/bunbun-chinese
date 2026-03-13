@@ -1056,6 +1056,7 @@ function loadApiKeyField() {
   if(inp) { inp.value=key; document.getElementById('apiKeyStatus').innerHTML=key?'<span style="color:var(--green);">✅ Key saved on this device.</span>':'<span style="color:var(--muted);">No key yet — paste one above.</span>'; }
 }
 
+function saveVoicePrefs() {
   const g=(id)=>{const e=document.getElementById(id);return e?e.value:'';};
   state.voices.cantVoice=g('cantVoiceSelect'); state.voices.mandVoice=g('mandVoiceSelect'); state.voices.bbVoice=g('bbVoiceSelect');
   state.voices.cantRate=parseFloat(g('cantRate'))||0.85; state.voices.mandRate=parseFloat(g('mandRate'))||0.85; state.voices.bbRate=parseFloat(g('bbRate'))||0.95;
