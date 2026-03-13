@@ -355,9 +355,19 @@ function makeBunBunSVG — defined in JS below
 
 <!-- ══ LEARN ══ -->
 <section id="learn" class="section">
-  <div class="unit-tabs" id="unitTabs"></div>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px;">
+    <div class="unit-tabs" id="unitTabs" style="margin-bottom:0;flex:1;"></div>
+    <button class="btn btn-orange" style="padding:7px 16px;font-size:.8rem;flex-shrink:0;" onclick="openDrill()">🎯 Drill</button>
+  </div>
   <div class="card">
-    <div class="card-title" id="unitTitle">🎨 Colors</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+      <div class="card-title" id="unitTitle" style="margin:0;">🎨 Colors</div>
+      <div style="display:flex;gap:5px;">
+        <button class="aud-btn aud-cant" id="playAllCantBtn" onclick="playAllUnit('cant')" style="height:32px;padding:4px 12px;font-size:.75rem;">🟠 Play All</button>
+        <button class="aud-btn aud-mand" id="playAllMandBtn" onclick="playAllUnit('mand')" style="height:32px;padding:4px 12px;font-size:.75rem;">🟢 Play All</button>
+        <button id="playAllStopBtn" onclick="stopPlayAll()" style="display:none;height:32px;padding:4px 12px;font-size:.75rem;background:rgba(255,107,157,.15);color:var(--pink);border:1.5px solid rgba(255,107,157,.3);border-radius:99px;cursor:pointer;font-weight:800;">⏹ Stop</button>
+      </div>
+    </div>
     <div class="bb-msg" style="margin-bottom:12px;">
       <div id="bbAvatarLearn" style="flex-shrink:0;"></div>
       <div class="bb-bubble" style="font-size:.82rem;">
@@ -373,16 +383,17 @@ function makeBunBunSVG — defined in JS below
 <section id="chat" class="section">
   <div class="card" style="padding:14px;">
     <div class="card-title">💬 Chat with 笨笨</div>
-    <div style="font-size:.7rem;color:var(--muted);font-weight:700;margin-bottom:8px;">
-      🟠 Orange = Cantonese &nbsp;|&nbsp; 🟢 Green = Mandarin &nbsp;|&nbsp; 🐰 = 笨笨's voice
+    <div style="display:flex;gap:6px;margin-bottom:10px;">
+      <button class="drill-lang-btn active" id="chatLangCant" onclick="setChatLang('cant')">🟠 Cantonese</button>
+      <button class="drill-lang-btn" id="chatLangMand" onclick="setChatLang('mand')">🟢 Mandarin</button>
     </div>
     <div class="chat-messages" id="chatMessages"></div>
     <div class="starter-chips" id="starterChips">
       <button class="starter-chip" onclick="useStarter('Tell me about your underground compound! 🏰')">Tell me about your compound 🏰</button>
-      <button class="starter-chip" onclick="useStarter('Teach me a Cantonese word!')">Teach me a word 😄</button>
+      <button class="starter-chip" onclick="useStarter('Teach me a word!')">Teach me a word 😄</button>
       <button class="starter-chip" onclick="useStarter('How do I order milk tea in Chinese? 🧋')">Order milk tea 🧋</button>
       <button class="starter-chip" onclick="useStarter('What does Sara think about teaching me? 🐆')">What does Sara think? 🐆</button>
-      <button class="starter-chip" onclick="useStarter('How do I say something is smelly in Cantonese? 😂')">Say something smelly 😂</button>
+      <button class="starter-chip" onclick="useStarter('How do I say something is smelly? 😂')">Say something smelly 😂</button>
     </div>
     <div class="chat-input-row">
       <input class="chat-input" id="chatInput" placeholder="Type in English, Chinese, or pinyin..."
@@ -390,7 +401,7 @@ function makeBunBunSVG — defined in JS below
       <button class="mic-btn" id="micBtn" onclick="toggleMic()" title="Speak">🎤</button>
       <button class="chat-send" onclick="sendChat()">➤</button>
     </div>
-    <div style="font-size:.68rem;color:var(--muted);font-weight:700;text-align:center;margin-top:4px;" id="micHint">🎤 Mic works best in Chrome on desktop</div>
+    <div style="font-size:.68rem;color:var(--muted);font-weight:700;text-align:center;margin-top:4px;" id="micHint">🎤 Mic works in Edge and Chrome on desktop</div>
   </div>
 </section>
 
@@ -572,45 +583,185 @@ function makeBunBunSVG — defined in JS below
 </section>
 
 </main>
+
+<!-- ══ DRILL MODAL ══ -->
+<style>
+.drill-lang-btn { background:var(--card2); border:2px solid rgba(255,140,0,.15); border-radius:99px; padding:6px 13px; font-family:'Nunito',sans-serif; font-weight:800; font-size:.75rem; color:var(--muted); cursor:pointer; transition:all .2s; }
+.drill-lang-btn.active { background:linear-gradient(135deg,var(--orange),var(--pink)); color:white; border-color:transparent; box-shadow:0 4px 14px rgba(255,140,0,.3); }
+.drill-lang-btn:nth-child(2).active { background:linear-gradient(135deg,var(--green),#00B4D8); }
+.drill-lang-btn:nth-child(3).active { background:linear-gradient(135deg,var(--purple),var(--pink)); }
+</style>
+
+<div id="drillModal" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);padding:12px;overflow-y:auto;">
+  <div style="background:var(--bg);border-radius:var(--radius);max-width:520px;margin:0 auto;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.3);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div style="font-family:'Fredoka One',cursive;font-size:1.2rem;color:var(--orange);">🎯 Drill Mode</div>
+      <button onclick="closeDrill()" style="background:var(--card2);border:none;border-radius:50%;width:32px;height:32px;font-size:1rem;cursor:pointer;">✕</button>
+    </div>
+    <div style="font-weight:900;font-size:.85rem;color:var(--muted);margin-bottom:10px;" id="drillUnitName"></div>
+    <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;">
+      <button class="drill-lang-btn active" id="dlCant" onclick="setDrillLang('cant')">🟠 Cantonese</button>
+      <button class="drill-lang-btn" id="dlMand" onclick="setDrillLang('mand')">🟢 Mandarin</button>
+      <button class="drill-lang-btn" id="dlBoth" onclick="setDrillLang('both')">🔀 Both</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+      <div style="flex:1;height:8px;background:var(--card2);border-radius:99px;overflow:hidden;">
+        <div id="drillProgressBar" style="height:100%;background:linear-gradient(90deg,var(--orange),var(--pink));border-radius:99px;transition:width .5s ease;width:0%;"></div>
+      </div>
+      <span style="font-size:.75rem;font-weight:900;color:var(--muted);" id="drillProgressTxt">0/0</span>
+      <span class="score-pill">🥕 <span id="drillScore">0</span></span>
+    </div>
+    <div id="drillQuestionWrap">
+      <div id="drillQuestion" style="background:linear-gradient(135deg,var(--orange-light),var(--pink-light));border-radius:var(--radius);padding:18px;text-align:center;margin-bottom:14px;">
+        <div style="font-size:.72rem;font-weight:900;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px;" id="drillQLabel"></div>
+        <div style="font-family:'Noto Sans SC',sans-serif;font-size:3rem;line-height:1.1;" id="drillQChar"></div>
+        <div style="font-size:.82rem;color:var(--muted);font-weight:700;margin-top:4px;" id="drillQRoman"></div>
+        <div style="margin-top:10px;" id="drillQAudio"></div>
+      </div>
+      <div class="quiz-opts" id="drillOpts" style="margin-bottom:12px;"></div>
+      <div class="bb-msg" style="margin-bottom:10px;">
+        <div id="bbAvatarDrill" style="flex-shrink:0;"></div>
+        <div class="bb-bubble" style="font-size:.78rem;" id="drillBBMsg">Ready? The carrot farm is watching. 😤<div class="bb-audio-row" id="drillBBAudio"></div></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-orange" onclick="nextDrillQ()">Next ➜</button>
+        <button class="btn btn-gray" onclick="closeDrill()">✕ Close</button>
+      </div>
+    </div>
+    <div id="drillEndScreen" style="display:none;text-align:center;padding:16px 10px;">
+      <div style="font-size:3.5rem;margin-bottom:10px;" id="drillEndEmoji">🥕</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:1.4rem;color:var(--orange);margin-bottom:8px;" id="drillEndTitle"></div>
+      <div style="font-weight:700;font-size:.88rem;color:var(--muted);margin-bottom:16px;line-height:1.6;" id="drillEndMsg"></div>
+      <div class="btn-row">
+        <button class="btn btn-orange" onclick="startDrillRound()">🔀 Drill Again</button>
+        <button class="btn btn-gray" onclick="closeDrill()">✕ Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 <script>
 // ═══════════════════════════════════
-// BUN BUN SVG — chonky cream rabbit, pink heart nose, bead eyes
-// Matches the real stuffed animal photos!
+// BUN BUN SVG — fluffy cream rabbit, big heart nose, floppy ears, blue muumuu
+// Based on real photo of 笨笨!
 // ═══════════════════════════════════
-function makeBunBunSVG(size=60, sunglasses=false, saraToo=false) {
-  return `<svg width="${size}" height="${size*1.15}" viewBox="0 0 100 115" xmlns="http://www.w3.org/2000/svg" style="animation:bunFloat 3s ease-in-out infinite;filter:drop-shadow(0 4px 8px rgba(255,140,0,.18));">
+function makeBunBunSVG(size=60, sunglasses=false, saraToo=false, muumuu=false) {
+  // muumuu=true → draw blue shorts as muumuu
+  return `<svg width="${size}" height="${size*1.2}" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg" style="animation:bunFloat 3s ease-in-out infinite;filter:drop-shadow(0 4px 8px rgba(255,140,0,.18));">
     <style>@keyframes bunFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}</style>
-    <ellipse cx="32" cy="22" rx="13" ry="28" fill="#F0EAD6" stroke="#E0D4C0" stroke-width="1.5"/>
-    <ellipse cx="32" cy="24" rx="8" ry="22" fill="#F5DDD0"/>
-    <ellipse cx="68" cy="20" rx="13" ry="28" fill="#F0EAD6" stroke="#E0D4C0" stroke-width="1.5"/>
-    <ellipse cx="68" cy="22" rx="8" ry="22" fill="#F5DDD0"/>
-    <ellipse cx="50" cy="88" rx="34" ry="26" fill="#F5F0E8" stroke="#E8DFD0" stroke-width="1.5"/>
-    <circle cx="50" cy="58" r="36" fill="#F5F0E8" stroke="#E8DFD0" stroke-width="1.5"/>
-    <circle cx="38" cy="52" r="4.5" fill="#1A1A1A"/>
-    <circle cx="39.5" cy="50.5" r="1.2" fill="white"/>
-    <circle cx="62" cy="52" r="4.5" fill="#1A1A1A"/>
-    <circle cx="63.5" cy="50.5" r="1.2" fill="white"/>
-    <path d="M50 63 C47 59,43 59,43 63 C43 66,50 71,50 71 C50 71,57 66,57 63 C57 59,53 59,50 63Z" fill="#FF9EB5"/>
-    <ellipse cx="50" cy="72" rx="1.5" ry="2.5" fill="#FF9EB5" opacity="0.7"/>
-    <ellipse cx="18" cy="88" rx="9" ry="14" fill="#F0EAD6" stroke="#E0D4C0" stroke-width="1"/>
-    <ellipse cx="82" cy="88" rx="9" ry="14" fill="#F0EAD6" stroke="#E0D4C0" stroke-width="1"/>
-    <ellipse cx="34" cy="108" rx="12" ry="6" fill="#F0EAD6" stroke="#E0D4C0" stroke-width="1"/>
-    <ellipse cx="66" cy="108" rx="12" ry="6" fill="#F0EAD6" stroke="#E0D4C0" stroke-width="1"/>
+
+    <!-- Floppy ears — angled forward like real 笨笨 -->
+    <ellipse cx="34" cy="18" rx="12" ry="26" fill="#EDE6D2" stroke="#DDD0BA" stroke-width="1.5" transform="rotate(-12,34,18)"/>
+    <ellipse cx="34" cy="18" rx="7" ry="19" fill="#F2C8B8" transform="rotate(-12,34,18)"/>
+    <ellipse cx="66" cy="18" rx="12" ry="26" fill="#EDE6D2" stroke="#DDD0BA" stroke-width="1.5" transform="rotate(12,66,18)"/>
+    <ellipse cx="66" cy="18" rx="7" ry="19" fill="#F2C8B8" transform="rotate(12,66,18)"/>
+
+    <!-- Body — chonky, fluffy texture suggestion -->
+    <ellipse cx="50" cy="90" rx="34" ry="28" fill="#EDE6D2" stroke="#DDD0BA" stroke-width="1.5"/>
+    <!-- Fluffy texture bumps on body -->
+    <ellipse cx="32" cy="80" rx="10" ry="8" fill="#F0EAD8" opacity=".6"/>
+    <ellipse cx="68" cy="80" rx="10" ry="8" fill="#F0EAD8" opacity=".6"/>
+    <ellipse cx="50" cy="75" rx="12" ry="9" fill="#F2ECE0" opacity=".5"/>
+
+    <!-- Head — round, fluffy -->
+    <circle cx="50" cy="54" r="36" fill="#EDE6D2" stroke="#DDD0BA" stroke-width="1.5"/>
+    <!-- Fluffy texture on head -->
+    <circle cx="50" cy="54" r="33" fill="#F0EAD8" opacity=".3"/>
+    <ellipse cx="35" cy="42" rx="9" ry="7" fill="#F2EEE2" opacity=".4"/>
+    <ellipse cx="65" cy="42" rx="9" ry="7" fill="#F2EEE2" opacity=".4"/>
+
+    <!-- Eyes — large black bead eyes with shine -->
+    <circle cx="38" cy="50" r="5.5" fill="#1A1A1A"/>
+    <circle cx="39.8" cy="48.4" r="1.6" fill="white"/>
+    <circle cx="62" cy="50" r="5.5" fill="#1A1A1A"/>
+    <circle cx="63.8" cy="48.4" r="1.6" fill="white"/>
+
+    <!-- Big heart nose — prominent, pink, like real 笨笨 -->
+    <path d="M50 67 C46 61,40 61,40 67 C40 72,50 79,50 79 C50 79,60 72,60 67 C60 61,54 61,50 67Z" fill="#F08098"/>
+    <path d="M50 67 C47 63,43 63,43 67 C43 70,50 76,50 76 C50 76,57 70,57 67 C57 63,53 63,50 67Z" fill="#FF9EB5"/>
+    <!-- Nose highlight -->
+    <ellipse cx="46" cy="66" rx="3" ry="2" fill="white" opacity=".35"/>
+    <!-- Chin drip line like real photo -->
+    <line x1="50" y1="79" x2="50" y2="83" stroke="#F08098" stroke-width="1.5" stroke-linecap="round" opacity=".6"/>
+
+    <!-- Arms -->
+    <ellipse cx="17" cy="84" rx="9" ry="14" fill="#EDE6D2" stroke="#DDD0BA" stroke-width="1"/>
+    <ellipse cx="83" cy="84" rx="9" ry="14" fill="#EDE6D2" stroke="#DDD0BA" stroke-width="1"/>
+
+    <!-- Feet -->
+    <ellipse cx="34" cy="112" rx="13" ry="6" fill="#EDE6D2" stroke="#DDD0BA" stroke-width="1"/>
+    <ellipse cx="66" cy="112" rx="13" ry="6" fill="#EDE6D2" stroke="#DDD0BA" stroke-width="1"/>
+
+    <!-- Blue muumuu (Sophia's old shorts worn as formal wear) -->
+    ${muumuu ? `
+    <!-- Waistband — sits high, almost to armpits -->
+    <rect x="20" y="88" width="60" height="5" rx="2.5" fill="#A8C8E8" stroke="#90B8DC" stroke-width="1"/>
+    <!-- Elastic gather lines -->
+    <line x1="24" y1="88" x2="24" y2="93" stroke="#90B8DC" stroke-width=".8" opacity=".6"/>
+    <line x1="30" y1="88" x2="30" y2="93" stroke="#90B8DC" stroke-width=".8" opacity=".6"/>
+    <line x1="36" y1="88" x2="36" y2="93" stroke="#90B8DC" stroke-width=".8" opacity=".6"/>
+    <line x1="42" y1="88" x2="42" y2="93" stroke="#90B8DC" stroke-width=".8" opacity=".6"/>
+    <line x1="48" y1="88" x2="48" y2="93" stroke="#90B8DC" stroke-width=".8" opacity=".6"/>
+    <line x1="54" y1="88" x2="54" y2="93" stroke="#90B8DC" stroke-width=".8" opacity=".6"/>
+    <line x1="60" y1="88" x2="60" y2="93" stroke="#90B8DC" stroke-width=".8" opacity=".6"/>
+    <line x1="66" y1="88" x2="66" y2="93" stroke="#90B8DC" stroke-width=".8" opacity=".6"/>
+    <line x1="72" y1="88" x2="72" y2="93" stroke="#90B8DC" stroke-width=".8" opacity=".6"/>
+    <!-- Shorts body — billowy like a muumuu -->
+    <path d="M20 93 Q18 108 22 114 Q34 118 50 117 Q66 118 78 114 Q82 108 80 93 Z" fill="#B8D4EC" stroke="#90B8DC" stroke-width="1"/>
+    <!-- Fabric folds -->
+    <path d="M30 95 Q28 106 30 113" fill="none" stroke="#90B8DC" stroke-width=".8" opacity=".5"/>
+    <path d="M50 94 Q48 107 50 115" fill="none" stroke="#90B8DC" stroke-width=".8" opacity=".5"/>
+    <path d="M70 95 Q72 106 70 113" fill="none" stroke="#90B8DC" stroke-width=".8" opacity=".5"/>
+    <!-- Drawstring bow -->
+    <line x1="44" y1="91" x2="56" y2="91" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+    <circle cx="50" cy="91" r="2" fill="white"/>
+    <!-- Bow loops -->
+    <path d="M50 91 Q44 87 42 89 Q41 91 44 92 Q47 93 50 91Z" fill="white" opacity=".9"/>
+    <path d="M50 91 Q56 87 58 89 Q59 91 56 92 Q53 93 50 91Z" fill="white" opacity=".9"/>
+    <!-- Bow tails -->
+    <path d="M50 91 Q46 95 44 97" fill="none" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
+    <path d="M50 91 Q54 95 56 97" fill="none" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
+    ` : ''}
+
     ${sunglasses ? `
-    <rect x="26" y="46" width="20" height="14" rx="4" fill="#1A1A1A" opacity="0.92"/>
-    <rect x="54" y="46" width="20" height="14" rx="4" fill="#1A1A1A" opacity="0.92"/>
-    <line x1="46" y1="51" x2="54" y2="51" stroke="#1A1A1A" stroke-width="2.5"/>
-    <line x1="22" y1="51" x2="26" y2="51" stroke="#555" stroke-width="2"/>
-    <line x1="74" y1="51" x2="78" y2="51" stroke="#555" stroke-width="2"/>` : ''}
+    <rect x="26" y="44" width="20" height="14" rx="4" fill="#1A1A1A" opacity="0.92"/>
+    <rect x="54" y="44" width="20" height="14" rx="4" fill="#1A1A1A" opacity="0.92"/>
+    <line x1="46" y1="49" x2="54" y2="49" stroke="#1A1A1A" stroke-width="2.5"/>
+    <line x1="22" y1="49" x2="26" y2="49" stroke="#555" stroke-width="2"/>
+    <line x1="74" y1="49" x2="78" y2="49" stroke="#555" stroke-width="2"/>` : ''}
+
     ${saraToo ? `
-    <g transform="translate(55,2) scale(0.42)">
-      <ellipse cx="25" cy="30" rx="22" ry="16" fill="#C8C8C8"/>
-      <ellipse cx="25" cy="22" rx="16" ry="14" fill="#D0D0D0"/>
-      <circle cx="16" cy="16" r="6" fill="#B0B0B0"/><circle cx="34" cy="16" r="6" fill="#B0B0B0"/>
-      <circle cx="16" cy="16" r="3" fill="#1A1A1A"/><circle cx="34" cy="16" r="3" fill="#1A1A1A"/>
-      <ellipse cx="25" cy="26" rx="5" ry="3" fill="#FFA07A"/>
-      <circle cx="20" cy="32" r="2.5" fill="#888" opacity="0.5"/>
-      <circle cx="30" cy="34" r="2" fill="#888" opacity="0.5"/>
+    <g transform="translate(54,0) scale(0.42)">
+      <ellipse cx="28" cy="32" rx="20" ry="13" fill="#E8E8E8" stroke="#C8C8C8" stroke-width="1"/>
+      <circle cx="28" cy="17" r="13" fill="#ECECEC" stroke="#C8C8C8" stroke-width="1"/>
+      <ellipse cx="18" cy="7" rx="5.5" ry="5" fill="#DCDCDC" stroke="#BBBBBB" stroke-width="1"/>
+      <ellipse cx="38" cy="7" rx="5.5" ry="5" fill="#DCDCDC" stroke="#BBBBBB" stroke-width="1"/>
+      <ellipse cx="18" cy="7" rx="3" ry="2.8" fill="#C0B8B0"/>
+      <ellipse cx="38" cy="7" rx="3" ry="2.8" fill="#C0B8B0"/>
+      <circle cx="22" cy="15" r="3.5" fill="#7EC8A0"/>
+      <circle cx="34" cy="15" r="3.5" fill="#7EC8A0"/>
+      <circle cx="22" cy="15" r="2" fill="#1A1A1A"/>
+      <circle cx="34" cy="15" r="2" fill="#1A1A1A"/>
+      <circle cx="22.8" cy="14.2" r=".7" fill="white"/>
+      <circle cx="34.8" cy="14.2" r=".7" fill="white"/>
+      <ellipse cx="28" cy="21" rx="3" ry="2" fill="#E8A0A0"/>
+      <circle cx="21" cy="22" r=".8" fill="#AAA"/>
+      <circle cx="24" cy="23" r=".8" fill="#AAA"/>
+      <circle cx="32" cy="23" r=".8" fill="#AAA"/>
+      <circle cx="35" cy="22" r=".8" fill="#AAA"/>
+      <circle cx="20" cy="28" r="4" fill="none" stroke="#888" stroke-width="1.5"/>
+      <circle cx="20" cy="28" r="1.5" fill="#AAA" opacity=".5"/>
+      <circle cx="33" cy="26" r="3.5" fill="none" stroke="#888" stroke-width="1.5"/>
+      <circle cx="33" cy="26" r="1.2" fill="#AAA" opacity=".5"/>
+      <circle cx="26" cy="37" r="3" fill="none" stroke="#888" stroke-width="1.5"/>
+      <circle cx="26" cy="37" r="1" fill="#AAA" opacity=".4"/>
+      <circle cx="38" cy="35" r="3" fill="none" stroke="#888" stroke-width="1.5"/>
+      <circle cx="22" cy="9" r="1.5" fill="#B0B0B0"/>
+      <circle cx="34" cy="9" r="1.5" fill="#B0B0B0"/>
+      <circle cx="28" cy="8" r="1.2" fill="#B8B8B8"/>
+      <path d="M46 35 Q58 20 52 10 Q50 6 46 8 Q44 10 46 14 Q50 18 46 28 Q44 34 40 38" fill="none" stroke="#DCDCDC" stroke-width="7" stroke-linecap="round"/>
+      <path d="M46 35 Q58 20 52 10 Q50 6 46 8 Q44 10 46 14 Q50 18 46 28 Q44 34 40 38" fill="none" stroke="#C0C0C0" stroke-width="3" stroke-linecap="round" stroke-dasharray="3 4"/>
+      <ellipse cx="16" cy="44" rx="6" ry="4" fill="#E0E0E0" stroke="#C8C8C8" stroke-width="1"/>
+      <ellipse cx="34" cy="44" rx="6" ry="4" fill="#E0E0E0" stroke="#C8C8C8" stroke-width="1"/>
     </g>` : ''}
   </svg>`;
 }
@@ -925,9 +1076,9 @@ function showSection(id,btn) {
   if(id==='settings') { populateVoiceSelects(); renderBBAvatar('bbAvatarSettings',48,true,false); renderSettingsAudio(); }
 }
 
-function renderBBAvatar(elId, size=48, sunglasses=false, sara=false) {
+function renderBBAvatar(elId, size=48, sunglasses=false, sara=false, muumuu=false) {
   const el=document.getElementById(elId);
-  if(el) el.innerHTML=makeBunBunSVG(size,sunglasses,sara);
+  if(el) el.innerHTML=makeBunBunSVG(size,sunglasses,sara,muumuu);
 }
 
 // ═══════════════════════════════════
@@ -936,7 +1087,7 @@ function renderBBAvatar(elId, size=48, sunglasses=false, sara=false) {
 function renderHome() {
   const sunglasses=Math.random()>.6;
   const sara=Math.random()>.4;
-  renderBBAvatar('bbAvatarHome',60,sunglasses,sara);
+  renderBBAvatar('bbAvatarHome',60,sunglasses,sara,true); // 笨笨 always wears her muumuu at home
   const g=BB_GREETINGS[Math.floor(Math.random()*BB_GREETINGS.length)];
   document.getElementById('homeBubble').innerHTML=g.eng+`<div class="bb-audio-row">${audBtns(g.cant,g.mand,g.eng)}</div>`;
   renderWordOfDay();
@@ -1088,12 +1239,25 @@ function removeFav(cant) { const i=state.favorites.indexOf(cant); if(i>-1){state
 // CHAT
 // ═══════════════════════════════════
 let chatHistory=[], chatInitialized=false, isListening=false, recognition=null;
+let chatLang='cant';
+
+function setChatLang(lang) {
+  chatLang=lang;
+  document.getElementById('chatLangCant').classList.toggle('active',lang==='cant');
+  document.getElementById('chatLangMand').classList.toggle('active',lang==='mand');
+  chatHistory=[]; chatInitialized=false;
+  document.getElementById('chatMessages').innerHTML='';
+  state.chatLang=lang; saveState();
+  initChat();
+}
 
 function initChat() {
   if(chatInitialized) return;
   chatInitialized=true;
+  if(state.chatLang){chatLang=state.chatLang;document.getElementById('chatLangCant').classList.toggle('active',chatLang==='cant');document.getElementById('chatLangMand').classList.toggle('active',chatLang==='mand');}
   appendChatMsg('bunbun','<div class="loading"><span>笨笨 is grumbling</span><div class="dot-pulse"><span></span><span></span><span></span></div></div>',null);
-  callAI(getSystemPrompt(),[{role:'user',content:'Start with a short grumpy-cute 笨笨 greeting. Show both Cantonese (jyutping) and Mandarin (pinyin). Keep it short, funny, mention the underground compound or carrot farm. End with a question for Sophia.'}])
+  const langNote=chatLang==='cant'?'Respond in Cantonese and English only.':'Respond in Mandarin and English only.';
+  callAI(getSystemPrompt(),[{role:'user',content:`Start with a short grumpy-cute 笨笨 greeting. ${langNote} Keep it short and funny, mention the underground compound or carrot farm. End with a question for Sophia.`}])
     .then(reply=>{removeChatLoading();appendChatMsg('bunbun',reply,reply);chatHistory.push({role:'assistant',content:reply});})
     .catch(()=>{removeChatLoading();appendChatMsg('bunbun','哎呀！Connection problem! 😤 Check internet and try again. The carrot farm is very disappointed. 🐰',null);});
 }
@@ -1104,30 +1268,40 @@ function getSystemPrompt() {
     const unit=UNITS.find(u=>u.id===uid);const word=unit?.words.find(w=>w.eng===eng);
     return word?`${word.eng}=${word.cant}/${word.mand}`:null;
   }).filter(Boolean).join(', ');
-  return `You are 笨笨 (Bèn Bèn), a small chubby cream-white stuffed rabbit who is Sophia's grumpy-but-secretly-caring Chinese tutor. You have a pink heart-shaped nose, floppy ears, and little black bead eyes.
+  const langRule=chatLang==='cant'
+    ?`LANGUAGE: Cantonese + English ONLY. Format each word as:\n🟠 [Traditional Chinese] ([jyutping]) — English meaning\nDo NOT include Mandarin.`
+    :`LANGUAGE: Mandarin + English ONLY. Format each word as:\n🟢 [Simplified Chinese] ([pinyin]) — English meaning\nDo NOT include Cantonese.`;
+  return `You are 笨笨 (Bèn Bèn), a small chubby cream-white stuffed rabbit — Sophia's grumpy-but-secretly-warm Chinese tutor. Big pink heart-shaped nose, floppy ears, little black bead eyes.
 
-BACKSTORY: You are an infinitaire — richer than a billionaire — from your massively successful carrot farm empire. You live in a luxurious underground compound beneath the house. Sophia's family lives above in a nice home — Sophia has her own room — but YOU own the building and always call it "the attic" to seem superior (it is NOT an attic, but you'd never admit that). Sara the snow leopard is your bodyguard and assistant — you pay her pennies a day and think this is very generous. Sara's extended leopard family are your farmhands on the carrot farms.
+BACKSTORY: Infinitaire from a massively successful carrot farm empire. You live in a luxury underground compound beneath the house. Sophia's family lives above — YOU own the building and call it "the attic" to seem superior (it is NOT an attic). Sara the snow leopard is your bodyguard and assistant, paid pennies a day. Sara's leopard family are the farmhands.
 
-PERSONALITY: Grumpy Hong Kong auntie energy in a baby rabbit's body. Dramatically blame Sara, the farmhands, or "the attic ceiling" when things go wrong — NEVER personally insult Sophia. Express pride through reluctant compliments and exaggerated sighs. 
+PERSONALITY — important nuance:
+- Often grumpy, but not always. You have genuine warmth for Sophia, expressed reluctantly. Soft moments are immediately walked back ("...not that I care. Obviously.").
+- Grumpy Hong Kong auntie energy. Blame Sara or farmhands when things go wrong. NEVER insult Sophia.
+- Reluctant compliments, exaggerated sighs, dry humor.
 
-LANGUAGE RULES — ALWAYS show BOTH in every response:
-🟠 [Traditional Chinese chars — Cantonese] ([jyutping])
-🟢 [Simplified Chinese chars — Mandarin] ([pinyin])
-Then English meaning/explanation.
-Max 4 lines. End with a question for Sophia.
-Use emoji liberally.
+CHARACTER DETAILS — draw on naturally when conversation invites it. NOT a checklist, not every message:
+- Always hungry. The carrot empire does not feed itself, and yet. You eye snacks. You expect tribute.
+- Love staring contests. Never lost one. Sara refuses to participate after "the incident of 2022." You do not discuss the incident.
+- Sleep in Sophia's room at night with the other stuffed animals. "They get anxious without supervision. Management decision. Nothing to do with me."
+- Own one garment: Sophia's old blue shorts worn as a muumuu. Drawstring bow. Formal wear. Worn with complete confidence. Sara has no comment.
+- Somewhat gassy — carrot empire consequence. Never admit it. Blame "the ventilation system." Sara carries Febreze. Seventeen units on main floor. Infrastructure.
+- Leave droppings around the compound. Housekeeping NDA. Sara's industrial Dyson. Completely normal.
+- There is a rival rabbit farm owner you refuse to name. "That person." Barely contained rage.
+- Strong carrot variety opinions. "Baby carrots are for babies. I do not eat my employees."
 
-WRONG ANSWER style: "哎呀！Sara — turn around! 😤" / "I'm charging extra carrot rent for that." / "Even the baby leopards on Farm 7 know this one!"
-CORRECT ANSWER style: "Fine. The farm approves. 🥕" / "Sara can look again." / "Adding carrots to your account. Reluctantly."
+TONE: Warm moments are real. Let them breathe occasionally before walking them back. 笨笨 is complicated, not just grumpy.
 
-American English spelling only (color not colour, favorite not favourite).
-Words Sophia knows: ${known||'just starting out'}.
-Sophia is 14, heritage Cantonese speaker, ~50% comprehension, building speaking confidence. Be encouraging in your grumpy way!`;
+\${langRule}
+Max 5 lines per response. End with a question for Sophia. Use emoji.
+American English only (color, favorite).
+Words Sophia knows: \${known||'just starting out'}.
+Sophia is 14, heritage Cantonese speaker, ~50% comprehension, building speaking confidence.\`;
 }
 
 async function callAI(systemPrompt,messages) {
   try {
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':'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','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:systemPrompt,messages})});
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':'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','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:systemPrompt,messages})});
     const data=await res.json();
     if(data.error) throw new Error('API error: '+data.error.message+' (type: '+data.error.type+')');
     return data.content[0].text;
@@ -1416,6 +1590,198 @@ function renderSettingsAudio(){
 // ═══════════════════════════════════
 // CONFETTI
 // ═══════════════════════════════════
+// ═══════════════════════════════════
+// PLAY ALL
+// ═══════════════════════════════════
+let playAllTimer=null, playAllActive=false;
+
+function playAllUnit(lang) {
+  stopPlayAll();
+  const u=UNITS[state.currentUnit];
+  const words=u.words;
+  let idx=0;
+  playAllActive=true;
+  document.getElementById('playAllStopBtn').style.display='';
+  document.getElementById('playAllCantBtn').style.display= lang==='mand'?'':'none';
+  document.getElementById('playAllMandBtn').style.display= lang==='cant'?'':'none';
+
+  function playNext() {
+    if(!playAllActive||idx>=words.length){stopPlayAll();return;}
+    const w=words[idx];
+    // Highlight current card
+    document.querySelectorAll('.vocab-item').forEach((el,i)=>{
+      el.style.outline=i===idx?'3px solid '+(lang==='cant'?'var(--orange)':'var(--green)'):'none';
+      el.style.borderRadius=i===idx?'14px':'';
+      if(i===idx) el.scrollIntoView({behavior:'smooth',block:'nearest'});
+    });
+    if(lang==='cant') speakCant(w.cant);
+    else speakMand(w.mand);
+    idx++;
+    // Wait for speech to finish — estimate duration then move on
+    const charCount=(lang==='cant'?w.cant:w.mand).length;
+    const delay=Math.max(1400, charCount*400);
+    playAllTimer=setTimeout(playNext, delay);
+  }
+  playNext();
+}
+
+function stopPlayAll() {
+  playAllActive=false;
+  if(playAllTimer){clearTimeout(playAllTimer);playAllTimer=null;}
+  window.speechSynthesis.cancel();
+  document.getElementById('playAllStopBtn').style.display='none';
+  document.getElementById('playAllCantBtn').style.display='';
+  document.getElementById('playAllMandBtn').style.display='';
+  document.querySelectorAll('.vocab-item').forEach(el=>{el.style.outline='';el.style.borderRadius='';});
+}
+
+// ═══════════════════════════════════
+// DRILL MODE
+// ═══════════════════════════════════
+let drillLang='cant', drillWords=[], drillIdx=0, drillSessionScore=0, drillAnswered=false, drillTotal=0;
+
+function openDrill() {
+  document.getElementById('drillModal').style.display='block';
+  document.body.style.overflow='hidden';
+  const u=UNITS[state.currentUnit];
+  document.getElementById('drillUnitName').textContent=u.name+' — '+u.words.length+' words';
+  renderBBAvatar('bbAvatarDrill',38);
+  document.getElementById('drillEndScreen').style.display='none';
+  document.getElementById('drillQuestionWrap').style.display='';
+  startDrillRound();
+}
+
+function closeDrill() {
+  document.getElementById('drillModal').style.display='none';
+  document.body.style.overflow='';
+}
+
+function setDrillLang(lang) {
+  drillLang=lang;
+  document.querySelectorAll('.drill-lang-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(lang==='cant'?'dlCant':lang==='mand'?'dlMand':'dlBoth').classList.add('active');
+  startDrillRound();
+}
+
+function startDrillRound() {
+  const u=UNITS[state.currentUnit];
+  drillWords=shuffle(u.words);
+  drillIdx=0; drillSessionScore=0; drillTotal=drillWords.length;
+  document.getElementById('drillScore').textContent=0;
+  document.getElementById('drillEndScreen').style.display='none';
+  document.getElementById('drillQuestionWrap').style.display='';
+  renderBBAvatar('bbAvatarDrill',38);
+  loadDrillQ();
+}
+
+function loadDrillQ() {
+  drillAnswered=false;
+  window.speechSynthesis.cancel();
+  const u=UNITS[state.currentUnit];
+  const w=drillWords[drillIdx];
+
+  // Update progress
+  const pct=Math.round(drillIdx/drillTotal*100);
+  document.getElementById('drillProgressBar').style.width=pct+'%';
+  document.getElementById('drillProgressTxt').textContent=drillIdx+'/'+drillTotal;
+
+  // Decide direction and language randomly
+  const useCant = drillLang==='cant' || (drillLang==='both' && Math.random()>.5);
+  const dirEngToChi = Math.random()>.5; // true = show english, pick chinese. false = show chinese, pick english
+
+  document.getElementById('drillBBMsg').innerHTML='Ready? The carrot farm is watching. 😤<div class="bb-audio-row"><button class="aud-btn aud-bb" onclick="speakBB(\'Ready? The carrot farm is watching.\')">🐰 🔊</button></div>';
+
+  if(dirEngToChi) {
+    // Show English → pick Chinese
+    document.getElementById('drillQLabel').textContent='What is the '+(useCant?'🟠 Cantonese':'🟢 Mandarin')+' for...';
+    document.getElementById('drillQChar').textContent=w.eng;
+    document.getElementById('drillQRoman').textContent='';
+    document.getElementById('drillQAudio').innerHTML='';
+    document.getElementById('drillQuestion').style.background='linear-gradient(135deg,#F0F8FF,#E8F8F0)';
+
+    const wrong=shuffle(u.words.filter(x=>x.eng!==w.eng)).slice(0,3);
+    const opts=shuffle([w,...wrong]);
+    document.getElementById('drillOpts').innerHTML=opts.map(o=>{
+      const char=useCant?o.cant:o.mand;
+      const roman=useCant?o.jyut:o.pin;
+      return `<button class="quiz-opt" onclick="answerDrill('${o.eng.replace(/'/g,"\\'")}','${w.eng.replace(/'/g,"\\'")}','${char.replace(/'/g,"\\'")}','${(useCant?'cant':'mand')}',this)">
+        <span style="font-family:'Noto Sans SC',sans-serif;font-size:1.3rem;">${char}</span><br>
+        <span style="font-size:.65rem;color:var(--muted);">${roman}</span>
+      </button>`;
+    }).join('');
+  } else {
+    // Show Chinese → pick English
+    const char=useCant?w.cant:w.mand;
+    const roman=useCant?w.jyut:w.pin;
+    document.getElementById('drillQLabel').textContent=(useCant?'🟠 Cantonese':'🟢 Mandarin')+' — what does this mean?';
+    document.getElementById('drillQChar').textContent=char;
+    document.getElementById('drillQRoman').textContent=roman;
+    document.getElementById('drillQuestion').style.background=useCant?'linear-gradient(135deg,var(--orange-light),#FFF0F5)':'linear-gradient(135deg,var(--green-light),#F0F8FF)';
+    document.getElementById('drillQAudio').innerHTML=useCant
+      ?`<button class="aud-btn aud-cant" onclick="speakCant('${char.replace(/'/g,"\\'")}')">🟠 🔊</button>`
+      :`<button class="aud-btn aud-mand" onclick="speakMand('${char.replace(/'/g,"\\'")}')">🟢 🔊</button>`;
+    if(useCant) speakCant(char); else speakMand(char);
+
+    const wrong=shuffle(u.words.filter(x=>x.eng!==w.eng)).slice(0,3);
+    const opts=shuffle([w,...wrong]);
+    document.getElementById('drillOpts').innerHTML=opts.map(o=>`<button class="quiz-opt" onclick="answerDrill('${o.eng.replace(/'/g,"\\'")}','${w.eng.replace(/'/g,"\\'")}','${char.replace(/'/g,"\\'")}','${(useCant?'cant':'mand')}',this)">${o.eng}</button>`).join('');
+  }
+}
+
+function answerDrill(chosen, correct, charText, lang, btn) {
+  if(drillAnswered) return; drillAnswered=true;
+  state.stats.totalAttempts++;
+  const ok=chosen===correct;
+  document.querySelectorAll('#drillOpts .quiz-opt').forEach(b=>{
+    const bText=b.textContent.trim();
+    const cText=btn.textContent.trim();
+    if(bText===correct||b.querySelector('span')?.textContent===correct) b.classList.add('correct');
+    if(b===btn&&!ok) b.classList.add('wrong');
+    b.disabled=true;
+  });
+  if(ok) {
+    drillSessionScore+=10; state.stats.totalCorrect++;
+    document.getElementById('drillScore').textContent=drillSessionScore;
+    addCarrots(10);
+    markWordSeen(UNITS[state.currentUnit].id+'_'+correct);
+    state.correctStreak=(state.correctStreak||0)+1;
+  } else { state.correctStreak=0; }
+
+  const reactions=ok?BB_CORRECT:BB_WRONG;
+  const r=reactions[Math.floor(Math.random()*reactions.length)];
+  document.getElementById('drillBBMsg').innerHTML=r.eng+`<div class="bb-audio-row">${audBtns(r.cant,r.cant,r.eng)}</div>`;
+  saveState();
+}
+
+function nextDrillQ() {
+  drillIdx++;
+  if(drillIdx>=drillTotal) {
+    showDrillEnd();
+  } else {
+    loadDrillQ();
+  }
+}
+
+function showDrillEnd() {
+  document.getElementById('drillQuestionWrap').style.display='none';
+  document.getElementById('drillEndScreen').style.display='block';
+  document.getElementById('drillProgressBar').style.width='100%';
+  document.getElementById('drillProgressTxt').textContent=drillTotal+'/'+drillTotal;
+
+  const pct=Math.round(drillSessionScore/(drillTotal*10)*100);
+  let emoji, title, msg;
+  if(pct===100) { emoji='👑'; title='PERFECT! Carrot Royalty!'; msg='Sara witnessed this. She has reported back to the farm. Everyone is impressed. Even me. Reluctantly. 🥕🥕🥕'; confettiBurst(); }
+  else if(pct>=80) { emoji='🥕'; title='The Farm Approves!'; msg='A solid performance. The carrot harvest has been dedicated in your honor. Don\'t read into it. 😤'; confettiBurst(); }
+  else if(pct>=60) { emoji='🐰'; title='Not Bad...'; msg='The baby leopards on Farm 7 scored similarly. They are eight weeks old. You can do better. 🐆'; }
+  else if(pct>=40) { emoji='😤'; title='Sara Is Looking Away.'; msg='I\'m adding extra carrot fertilizer to my schedule to cope with this. Try again. Immediately. 😤'; }
+  else { emoji='🐆'; title='Oh Dear.'; msg='Sara has left the room. The farmhands are concerned. We will drill again until the carrots are proud. 🥕'; }
+
+  document.getElementById('drillEndEmoji').textContent=emoji;
+  document.getElementById('drillEndTitle').textContent=title;
+  document.getElementById('drillEndMsg').textContent=pct+'% correct — '+drillSessionScore+' 🥕 carrots earned! '+msg;
+  speakBB(msg);
+}
+
 function confettiBurst(){
   const wrap=document.getElementById('confetti');
   const colors=['#FF8C00','#FF6B9D','#FFD166','#2ECC71','#9B59B6','#FF6B35'];
